@@ -36,3 +36,9 @@
   "messageType" : "RECEIVERS",
   "receivers" : [{ "deviceName" : "my-browser-music" , "uuid" :  "lfsjljl3l24j3o4jij3"},{"deviceName" : "my-browser-youtube" , "uuid" :  "fldsjfldsjl"}]
 }
+
+{
+  "messageType" : "MEDIA_STATE",
+  "stateType" : "CONTROLS",
+  "content" : {playing: false, time: 0, maxTime: 0}
+}
