@@ -1,5 +1,7 @@
 ## Communication interface between server and clients
 
+### Clients
+
 {
   "messageType": "START",
   "memberType" : "CONTROLLER" //{RECEIVER},
@@ -21,7 +23,10 @@
   "deviceName" : "my-browser"
 }
 
+
+### Server
+
 {
   "messageType" : "RECEIVERS",
-  "receivers" : ["my-browser-music", "my-browser-youtube"]
+  "receivers" : [{ "deviceName" : "my-browser-music" , "uuid" :  "lfsjljl3l24j3o4jij3"},{"deviceName" : "my-browser-youtube" , "uuid" :  "fldsjfldsjl"}]
 }
