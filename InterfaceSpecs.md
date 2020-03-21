@@ -23,6 +23,12 @@
   "deviceName" : "my-browser"
 }
 
+{
+  "messageType" : "MEDIA_STATE",
+  "stateType" : "CONTROLS",
+  "content" : {playing: false, time: 0, maxTime: 0}
+}
+
 
 ### Server
 
