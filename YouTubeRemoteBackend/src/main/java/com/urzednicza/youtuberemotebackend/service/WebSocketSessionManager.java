@@ -1,5 +1,7 @@
 package com.urzednicza.youtuberemotebackend.service;
 
+import com.urzednicza.youtuberemotebackend.enums.MemberType;
+import com.urzednicza.youtuberemotebackend.models.MemberSession;
 import com.urzednicza.youtuberemotebackend.models.RemoteSession;
 import com.urzednicza.youtuberemotebackend.models.User;
 import org.springframework.stereotype.Service;
@@ -19,23 +21,27 @@ public class WebSocketSessionManager {
         this.remoteSessions = new HashMap<>();
     }
 
-    public void registerSession(User user){
+    public void registerSession(User user) {
         RemoteSession remoteSession = new RemoteSession(user);
-        remoteSessions.put(user,remoteSession);
+        remoteSessions.put(user, remoteSession);
     }
 
-    public void initializeSession(User user,WebSocketSession webSocketSession, String deviceId){
-        remoteSessions.get(user).addMemberSession(webSocketSession,deviceId);
+    public void initializeSession(User user, WebSocketSession webSocketSession, String deviceId, MemberType memberType) {
+        remoteSessions.get(user).addMemberSession(webSocketSession, deviceId, memberType);
     }
 
-    public RemoteSession getRemoteSession(User user){
+    public RemoteSession getRemoteSession(User user) {
         return remoteSessions.get(user);
     }
 
-    public RemoteSession getRemoteSessionByMemberSession(WebSocketSession webSocketSession){
-        return (RemoteSession)remoteSessions.entrySet().stream().filter(remoteSession ->
-                remoteSession.getValue().getMemberSessions().entrySet().stream()
-                        .filter(memberSession -> memberSession.getValue().equals(webSocketSession)).map(Map.Entry::getKey).count()>0)
-                .map(Map.Entry::getValue).collect(Collectors.toSet()).toArray()[0];
+    public RemoteSession getRemoteSessionByMemberSession(WebSocketSession webSocketSession) {
+        for (Map.Entry<User, RemoteSession> entry : remoteSessions.entrySet()) {
+            for (Map.Entry<String, MemberSession> entry1 : entry.getValue().getMemberSessions().entrySet()) {
+                if (entry1.getValue().getWebSocketSession().equals(webSocketSession)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

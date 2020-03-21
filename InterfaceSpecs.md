@@ -20,3 +20,8 @@
   "messageType" : "SET_RECEIVER",
   "deviceName" : "my-browser"
 }
+
+{
+  "messageType" : "RECEIVERS",
+  "receivers" : ["my-browser-music", "my-browser-youtube"]
+}

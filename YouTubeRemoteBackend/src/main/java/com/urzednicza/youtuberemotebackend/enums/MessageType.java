@@ -1,5 +1,5 @@
 package com.urzednicza.youtuberemotebackend.enums;
 
 public enum MessageType {
-    START,STOP,MEDIA_CONTROL
+    START,STOP,MEDIA_CONTROL,SET_RECEIVER
 }
