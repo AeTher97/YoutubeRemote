@@ -1,6 +1,6 @@
 ## Communication interface between server and clients
 
-### Clients
+### Controllers
 
 {
   "messageType": "START",
@@ -23,10 +23,27 @@
   "deviceName" : "my-browser"
 }
 
+### Receivers
+
 {
-  "messageType" : "MEDIA_STATE",
-  "stateType" : "CONTROLS",
-  "content" : {playing: false, time: 0, maxTime: 0}
+  "messageType": "START",
+  "memberType" : "CONTROLLER" //{RECEIVER},
+  "deviceName" : "my-phone"
+}
+
+{
+  "messageType" : "CONTROLS_TIME",
+  "content" :  {playing: false, time: 0, maxTime: 0}
+}
+
+{
+  "messageType" : "CONTROLS_SONG",
+  "content" : {title: '', performer: '', imgSrc: ''}
+}
+
+{
+  "messageType" : "STOP",
+  "deviceName" : "my-phone"
 }
 
 
@@ -38,7 +55,21 @@
 }
 
 {
-  "messageType" : "MEDIA_STATE",
-  "stateType" : "CONTROLS",
+  "messageType" : "CONTROLS",
   "content" : {playing: false, time: 0, maxTime: 0}
+}
+
+{
+  "messageType" : "SET_RECEIVER",
+  "deviceName" : "my-browser"
+}
+
+{
+  "messageType" : "CONTROLS_TIME",
+  "content" :  {playing: false, time: 0, maxTime: 0}
+}
+
+{
+  "messageType" : "CONTROLS_SONG",
+  "content" : {title: '', performer: '', imgSrc: ''}
 }
