@@ -1,33 +1,40 @@
 package com.urzednicza.youtuberemotebackend.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.urzednicza.youtuberemotebackend.enums.MemberType;
 import com.urzednicza.youtuberemotebackend.models.MemberSession;
 import com.urzednicza.youtuberemotebackend.models.RemoteSession;
 import com.urzednicza.youtuberemotebackend.models.User;
+import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Service
+@Log4j
 public class WebSocketSessionManager {
 
     private Map<User, RemoteSession> remoteSessions;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public WebSocketSessionManager() {
         this.remoteSessions = new HashMap<>();
     }
 
     public void registerSession(User user) {
-        RemoteSession remoteSession = new RemoteSession(user);
+        RemoteSession remoteSession = new RemoteSession(user, objectMapper);
         remoteSessions.put(user, remoteSession);
     }
 
     public void initializeSession(User user, WebSocketSession webSocketSession, String deviceId, MemberType memberType) {
-        remoteSessions.get(user).addMemberSession(webSocketSession, deviceId, memberType);
+        try {
+            remoteSessions.get(user).addMemberSession(webSocketSession, deviceId, memberType);
+        } catch (IOException e) {
+            log.error("Failed to notify receiver" + e.getMessage());
+        }
     }
 
     public RemoteSession getRemoteSession(User user) {

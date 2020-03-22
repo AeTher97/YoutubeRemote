@@ -10,5 +10,5 @@ import lombok.Data;
 public class Stop {
 
     private MessageType messageType;
-    private String deviceId;
+    private String deviceName;
 }
