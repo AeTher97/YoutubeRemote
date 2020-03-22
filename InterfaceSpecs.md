@@ -55,11 +55,6 @@
 }
 
 {
-  "messageType" : "CONTROLS",
-  "content" : {playing: false, time: 0, maxTime: 0}
-}
-
-{
   "messageType" : "SET_RECEIVER",
   "deviceName" : "my-browser"
 }
