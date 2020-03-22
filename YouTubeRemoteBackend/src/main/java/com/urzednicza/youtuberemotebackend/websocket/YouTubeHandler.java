@@ -1,10 +1,8 @@
 package com.urzednicza.youtuberemotebackend.websocket;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.corba.se.spi.activation.InitialNameServicePackage.NameAlreadyBound;
-import com.urzednicza.youtuberemotebackend.enums.MemberType;
 import com.urzednicza.youtuberemotebackend.enums.MessageType;
 import com.urzednicza.youtuberemotebackend.models.RemoteSession;
 import com.urzednicza.youtuberemotebackend.models.User;
@@ -13,7 +11,6 @@ import com.urzednicza.youtuberemotebackend.models.messages.client.SetReceiver;
 import com.urzednicza.youtuberemotebackend.models.messages.client.Start;
 import com.urzednicza.youtuberemotebackend.models.messages.client.Stop;
 import com.urzednicza.youtuberemotebackend.models.messages.server.Error;
-import com.urzednicza.youtuberemotebackend.models.messages.server.Receivers;
 import com.urzednicza.youtuberemotebackend.service.WebSocketSessionManager;
 import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
@@ -35,7 +32,6 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
     public YouTubeHandler(WebSocketSessionManager webSocketSessionManager) {
         this.objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
         this.webSocketSessionManager = webSocketSessionManager;
     }
 
@@ -89,6 +85,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
                 break;
             case CONTROLS_SONG:
             case CONTROLS_TIME:
+            case QUEUE:
                 handleMediaState(message, user, webSocketSession);
                 break;
             case STOP:
@@ -112,12 +109,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
         if (remoteSession != null) {
             log.debug("user: " + remoteSession.getUser().getUsername());
             if (remoteSession.getMemberSessionDeviceName(webSocketSession) != null) {
-                if (remoteSession.getMemberSession(remoteSession.getMemberSessionDeviceName(webSocketSession)).getMemberType().equals(MemberType.RECEIVER)) {
-                    remoteSession.removeMemberSession(remoteSession.getMemberSessionDeviceName(webSocketSession));
-                    emitReceivers(remoteSession);
-                } else {
-                    remoteSession.removeMemberSession(remoteSession.getMemberSessionDeviceName(webSocketSession));
-                }
+                remoteSession.removeMemberSession(remoteSession.getMemberSessionDeviceName(webSocketSession));
             }
         }
     }
@@ -137,7 +129,6 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
         }
 
         webSocketSessionManager.initializeSession(user, webSocketSession, start.getDeviceName(), start.getMemberType());
-        emitReceivers(webSocketSessionManager.getRemoteSession(user));
 
     }
 
@@ -147,12 +138,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
 
     private void handleStop(WebSocketMessage<?> message, User user, WebSocketSession webSocketSession) throws IOException {
         Stop stop = objectMapper.readValue(message.getPayload().toString(), Stop.class);
-        MemberType memberType = webSocketSessionManager.getRemoteSession(user).getMemberSession(stop.getDeviceName()).getMemberType();
-
         webSocketSessionManager.getRemoteSession(user).removeMemberSession(stop.getDeviceName());
-        if (memberType.equals(MemberType.RECEIVER)) {
-            emitReceivers(webSocketSessionManager.getRemoteSession(user));
-        }
         log.debug("Removed member session of user: " + user.getUsername() + " device: " + stop.getDeviceName());
     }
 
@@ -166,19 +152,6 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
         }
     }
 
-    private void emitReceivers(RemoteSession remoteSession) throws JsonProcessingException {
-        Receivers receivers = new Receivers();
-        receivers.setReceivers(remoteSession.getReceivers());
-        TextMessage receiversMessage = new TextMessage(objectMapper.writeValueAsString(receivers));
-
-        remoteSession.getControllers().forEach(controller -> {
-            try {
-                controller.getWebSocketSession().sendMessage(receiversMessage);
-            } catch (IOException e) {
-                log.error("Failed to emit receivers");
-            }
-        });
-    }
 
     private void handleMediaState(WebSocketMessage<?> message, User user, WebSocketSession webSocketSession) throws IOException {
         webSocketSessionManager.getRemoteSession(user).getControllers().forEach(

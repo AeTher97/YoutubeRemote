@@ -3,9 +3,10 @@ package com.urzednicza.youtuberemotebackend.models;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.urzednicza.youtuberemotebackend.enums.MemberType;
-import com.urzednicza.youtuberemotebackend.enums.MessageType;
-import com.urzednicza.youtuberemotebackend.models.messages.client.SetReceiver;
+import com.urzednicza.youtuberemotebackend.models.messages.server.CurrentReceiver;
+import com.urzednicza.youtuberemotebackend.models.messages.server.Receivers;
 import javassist.NotFoundException;
+import lombok.extern.log4j.Log4j;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+@Log4j
 public class RemoteSession {
 
     private Map<String, MemberSession> memberSessions;
@@ -38,20 +41,26 @@ public class RemoteSession {
 
         if (memberType.equals(MemberType.RECEIVER) && mediaPlayer == null) {
             mediaPlayer = memberSession;
-            notifyReceivers();
-
         }
 
+        if (memberType.equals(MemberType.CONTROLLER)) {
+            emitReceivers();
+        }
         notifyReceivers();
     }
 
     public void removeMemberSession(String deviceName) throws IOException {
+
+        boolean isReceiver = memberSessions.get(deviceName).getMemberType().equals(MemberType.RECEIVER);
         if (memberSessions.get(deviceName).equals(mediaPlayer)) {
             mediaPlayer = null;
         }
         memberSessions.remove(deviceName);
         if (!getReceiversNames().isEmpty() && mediaPlayer == null) {
             mediaPlayer = memberSessions.get(getReceiversNames().get(0));
+            if (isReceiver) {
+                emitReceivers();
+            }
             notifyReceivers();
 
         }
@@ -83,10 +92,6 @@ public class RemoteSession {
         return mediaPlayer;
     }
 
-    public void setMediaPlayer(MemberSession mediaPlayer) {
-        this.mediaPlayer = mediaPlayer;
-    }
-
     public void setMediaPlayer(String deviceName) throws NotFoundException, IOException {
         if (getMemberSession(deviceName) != null) {
             this.mediaPlayer = getMemberSession(deviceName);
@@ -104,7 +109,7 @@ public class RemoteSession {
         }).collect(Collectors.toList());
     }
 
-    public List<String> getReceiversNames() {
+    private List<String> getReceiversNames() {
         List<String> receiversList = new ArrayList<>();
         for (Map.Entry<String, MemberSession> entry : memberSessions.entrySet()) {
             if (entry.getValue().getMemberType().equals(MemberType.RECEIVER)) {
@@ -119,15 +124,14 @@ public class RemoteSession {
     }
 
     private void notifyReceivers() throws JsonProcessingException {
-        SetReceiver setReceiver = new SetReceiver();
-        setReceiver.setMessageType(MessageType.SET_RECEIVER);
+        CurrentReceiver currentReceiver = new CurrentReceiver();
         if (mediaPlayer != null) {
-            setReceiver.setDeviceName(getMemberSessionDeviceName(mediaPlayer.getWebSocketSession()));
+            currentReceiver.setDeviceName(getMemberSessionDeviceName(mediaPlayer.getWebSocketSession()));
         } else {
-            setReceiver.setDeviceName(null);
+            currentReceiver.setDeviceName(null);
         }
 
-        TextMessage message = new TextMessage(objectMapper.writeValueAsString(setReceiver));
+        TextMessage message = new TextMessage(objectMapper.writeValueAsString(currentReceiver));
         getReceiversNames().forEach(receiver -> {
             try {
                 getMemberSession(receiver).getWebSocketSession().sendMessage(message);
@@ -142,6 +146,20 @@ public class RemoteSession {
                 controller.getWebSocketSession().sendMessage(message);
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        });
+    }
+
+    private void emitReceivers() throws JsonProcessingException {
+        Receivers receivers = new Receivers();
+        receivers.setReceivers(getReceivers());
+        TextMessage receiversMessage = new TextMessage(objectMapper.writeValueAsString(receivers));
+
+        getControllers().forEach(controller -> {
+            try {
+                controller.getWebSocketSession().sendMessage(receiversMessage);
+            } catch (IOException e) {
+                log.error("Failed to emit receivers");
             }
         });
     }
