@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "YouTube Remote",
-    "slug": "YouTube Remote",
+    "slug": "YouTubeRemote",
     "privacy": "public",
     "sdkVersion": "36.0.0",
     "platforms": [
@@ -15,7 +15,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

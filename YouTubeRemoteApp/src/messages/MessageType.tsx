@@ -2,5 +2,8 @@
 export enum MessageType {
     START = 'START',
     MEDIA_CONTROL = 'MEDIA_CONTROL',
-    STOP = 'STOP'
+    STOP = 'STOP',
+    RECEIVERS = 'RECEIVERS',
+    CONTROLS_TIME = 'CONTROLS_TIME',
+    CONTROLS_SONG = 'CONTROLS_SONG'
 };

@@ -1,5 +1,5 @@
-import IMessage from "./IMessage";
-import { MessageType } from "./MessageType";
+import IMessage from "../IMessage";
+import { MessageType } from "../MessageType";
 
 
 export default class StopMessage implements IMessage {
