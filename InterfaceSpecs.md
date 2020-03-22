@@ -55,7 +55,7 @@
 }
 
 {
-  "messageType" : "SET_RECEIVER",
+  "messageType" : "CURRENT_RECEIVER",
   "deviceName" : "my-browser"
 }
 
