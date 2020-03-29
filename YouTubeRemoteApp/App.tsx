@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import TestComponent from './src/TestComponent';
-import SelectedSongBar from './src/SelectedSongBar';
+
+import { Router, Scene } from 'react-native-router-flux'
+
+import Home from './src/scenes/home/Home';
+import Queue from './src/scenes/queue/Queue';
 
 export default class HelloWorldApp extends Component {
 
@@ -9,17 +12,14 @@ export default class HelloWorldApp extends Component {
     super(props);
   }
 
-
-
   public render(): JSX.Element {
     return (
-      <>
-        <TestComponent pomidorNumber={1} />
-        <View style={{height: '100%', justifyContent: 'flex-end'}}>
-          <SelectedSongBar />
-          <View style={{height: '10%', backgroundColor: "#1d1d1d"}}/>
-        </View>
-      </>
+      <Router>
+         <Scene key = "root">
+            <Scene key = "home" component = {Home} hideNavBar={true} initial = {true} />
+            <Scene key = "queue" component = {Queue} hideNavBar={true} />
+         </Scene>
+      </Router>
     );
   }
 }
