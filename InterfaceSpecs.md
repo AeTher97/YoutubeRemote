@@ -60,8 +60,9 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 
 {
   "messageType" : "CONTROLS_DETAILS",
-  "content" : {volume: 69, repeatType: 'NO_REPEAT'}//{REPEAT_ALL,REPEAT_ONE} }
+  "content" : {volume: 69, repeatType: 'REPEAT_OFF'}//{REPEAT_ALL,REPEAT_ONE} }
 }
+
 
 {
   "messageType" : "STOP",
@@ -106,7 +107,7 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 
 {
   "messageType" : "CONTROLS_DETAILS",
-  "content" : {volume: 69, repeatType: 'NO_REPEAT'}//{REPEAT_ALL,REPEAT_ONE} }
+  "content" : {volume: 69, repeatType: 'REPEAT_OFF'}//{REPEAT_ALL,REPEAT_ONE} }
 }
 
 
