@@ -1,24 +1,30 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, Image } from 'react-native';
+import { Text, View, StyleSheet, Image, TouchableWithoutFeedback } from 'react-native';
 
-import messageService, { MessageSubscription } from './services/MessageService';
-import { MessageType } from './messages/MessageType';
-import ControlsSongMessage from './messages/server-messages/ControlsSongMessage';
-import ControlsTimeMessage from './messages/server-messages/ControlsTimeMessage';
+import { Actions } from 'react-native-router-flux';
+
+import messageService, { MessageSubscription, MessageService } from '../../services/MessageService';
+import { MessageType } from '../../messages/MessageType';
+import ControlsSongMessage from '../../messages/server-messages/ControlsSongMessage';
+import ControlsTimeMessage from '../../messages/server-messages/ControlsTimeMessage';
+import { Icon } from 'react-native-elements';
+import SongInfo from './SongInfo';
+import PlayButton from './PlayButton';
+import MediaControlMessage, { MediaControlAction } from '../../messages/client-messages/MediaControlMessage';
 
 interface SelectedSongBarState {
     songLengthInSeconds: number,
     secondsPassed: number,
     title: string,
     performer: string,
-    isSongSelected: boolean,
-    imageSource: string
+    imageSource: string,
+    playing: boolean
 }
 
 export default class SelectedSongBar extends Component<{}, SelectedSongBarState> {
 
     private controlsSongSubscription: MessageSubscription;
-    private controlsTimeSubscription
+    private controlsTimeSubscription: MessageSubscription;
     private styles: any = StyleSheet.create({
         title: {
             fontWeight: 'bold',
@@ -45,23 +51,34 @@ export default class SelectedSongBar extends Component<{}, SelectedSongBarState>
         );
     }
 
+    private togglePlaying(): void {
+        if(this.state.playing)
+            messageService.sendMessage(new MediaControlMessage(MediaControlAction.PAUSE));
+        messageService.sendMessage(new MediaControlMessage(MediaControlAction.PLAY));
+    }
+
+    private onProgressClick(): void {
+        console.log('onProgressClick');
+    }
+
+    private isSongSelected(): boolean {
+        return !!this.state.title;
+    }
+
     private getElementIfSongIsSelected(): JSX.Element {
-        if(!this.state.isSongSelected)
+        if(!this.isSongSelected())
             return (<></>);
         return (
             <>
-                <View style={{ height: '98%', flexDirection: 'row', backgroundColor: "#1d1d1d"}}>
-                    <Image source={{uri: this.state.imageSource}} style={{aspectRatio: 1, height:'100%'}}></Image>
-                    <View style={{ width: 10 }}>
-                    </View>
-                    <View style={{justifyContent: 'space-around'}}>
-                        <Text style={this.styles.title}>{this.state.title}</Text>
-                        <Text style={this.styles.performerText}>{this.state.performer} · {this.getFormattedSongLength()}</Text>
-                    </View>
+                <View style={{ height: '98%', flexDirection: 'row', alignItems: "center", backgroundColor: "#1d1d1d"}}>
+                    <SongInfo title={this.state.title} performer={this.state.performer} songLengthInSeconds={this.state.songLengthInSeconds} imageSource={this.state.imageSource}/>
+                    <PlayButton playing={this.state.playing} onClick={() => this.togglePlaying()}/>
                 </View>
-                <View style={{ height: '2%', flexDirection: 'row', backgroundColor: "#9e9e9e"}}>
-                    <View style= {{ width: this.getProgressBarPercentage() + '%', backgroundColor: '#fff'}}/>
-                </View>
+                <TouchableWithoutFeedback onPress={this.onProgressClick}>
+                    <View style={{ height: '2%', flexDirection: 'row', backgroundColor: "#9e9e9e"}}>
+                        <View style= {{ width: this.getProgressBarPercentage() + '%', backgroundColor: '#fff'}}/>
+                    </View>
+                </TouchableWithoutFeedback>
             </>
         );
     }
@@ -72,19 +89,12 @@ export default class SelectedSongBar extends Component<{}, SelectedSongBarState>
         return 0;
     }
 
-    private getFormattedSongLength(): string {
-        const minutes = Math.floor(this.state.songLengthInSeconds / 60);
-        const seconds = this.state.songLengthInSeconds - (minutes * 60);
-        const secondsString = seconds < 10 ? '0' + seconds : seconds;
-        return minutes + ':' + secondsString;
-    }
-
     private handleTimeSongInformation(msg: ControlsTimeMessage): void {
         this.setState(() => {
             return {
                 songLengthInSeconds: msg.content.maxTime,
                 secondsPassed: msg.content.time,
-                isSongSelected: msg.content.playing
+                playing: msg.content.playing
             }
         })
     }
@@ -110,11 +120,11 @@ export default class SelectedSongBar extends Component<{}, SelectedSongBarState>
             secondsPassed: 0,
             title: '',
             performer: '',
-            isSongSelected: false,
-            imageSource: ''
-        };
+            imageSource: '',
+            playing: false
+        }
 
         this.controlsSongSubscription = messageService.subscribe<ControlsSongMessage>(MessageType.CONTROLS_SONG, msg => this.handleSongInformation(msg));
-        this.controlsSongSubscription = messageService.subscribe<ControlsTimeMessage>(MessageType.CONTROLS_TIME, msg => this.handleTimeSongInformation(msg));
+        this.controlsTimeSubscription = messageService.subscribe<ControlsTimeMessage>(MessageType.CONTROLS_TIME, msg => this.handleTimeSongInformation(msg));
     }
 }
