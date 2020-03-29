@@ -11,8 +11,9 @@
 
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE},
-  "timeSet" : 125 //optional(required in case of set time)
+  "action" : "PLAY", //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE, VOLUME},
+  "timeSet" : 125, //optional(required in case of set time)
+  "volumeSet" : 60 //percentage optional(required in case of volume)
 }
 
 {
@@ -32,6 +33,11 @@
   "messageType" : "SET_RECEIVER",
   "deviceName" : "my-browser"
 }
+
+{
+  "messageType" : "HEART_BEAT"
+}
+
 
 {"messageType":"QUEUE",
 "content":[{"index":0,"title":"Brothers In Arms","performer":"Dire Straits","imgSrc":"https://lh3.googleusercontent.com/c-rSp0l4FeZf4iiwSQhFeZ_3hNalG8Bgu-8WZCQDK0KE61OVu99a-_gOu-eifFuXCNI2AZeeLkFuyPWq-A=w60-h60-s-l90-rj"},
@@ -69,6 +75,10 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
   "deviceName" : "my-phone"
 }
 
+{
+  "messageType" : "HEART_BEAT"
+}
+
 
 ### Server
 
@@ -79,8 +89,9 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE},
-  "timeSet" : 125 //optional(required in case of set time)
+  "action" : "PLAY", //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE, VOLUME},
+  "timeSet" : 125, //optional(required in case of set time)
+  "volumeSet" : 60 //percentage optional(required in case of volume)
 }
 
 {
