@@ -14,6 +14,14 @@
 }
 
 {
+  "messageType" : "QUEUE_CONTROL",
+  "action" : "MOVE" //{REMOVE,NEXT, PREVIOUS},
+  "currentIndex": 12,
+  "targetIndex": 3
+}
+
+
+{
   "messageType" : "STOP",
   "deviceName" : "my-phone"
 }
@@ -59,6 +67,18 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 {
   "messageType" : "RECEIVERS",
   "receivers" : [{ "deviceName" : "my-browser-music" , "uuid" :  "lfsjljl3l24j3o4jij3"},{"deviceName" : "my-browser-youtube" , "uuid" :  "fldsjfldsjl"}]
+}
+
+{
+  "messageType" : "MEDIA_CONTROL",
+  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS}
+}
+
+{
+  "messageType" : "QUEUE_CONTROL",
+  "action" : "MOVE" //{REMOVE,NEXT, PREVIOUS},
+  "currentIndex": 12,
+  "targetIndex": 3
 }
 
 {
