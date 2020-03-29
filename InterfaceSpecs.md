@@ -8,9 +8,11 @@
   "deviceName" : "my-phone"
 }
 
+
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS}
+  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS},
+  "timeSet" : 125
 }
 
 {
@@ -71,7 +73,8 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS}
+  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS},
+  "timeSet" : 125
 }
 
 {
