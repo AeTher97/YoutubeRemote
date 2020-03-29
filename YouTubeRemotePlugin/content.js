@@ -3,4 +3,4 @@ const deviceName = 'my-browser';
 
 initializeWebSocket(address,deviceName);
 initializeObservers();
-
+setInterval(heartBeat,45000);

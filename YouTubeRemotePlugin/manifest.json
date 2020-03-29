@@ -7,7 +7,7 @@
       "matches": [
         "https://music.youtube.com/*"
       ],
-      "js": ["controller.js","snoopers.js","handlers.js","observers.js","socket.js","sender.js","content.js"]
+      "js": ["queue_controller.js","media_controller.js","snoopers.js","handlers.js","observers.js","socket.js","sender.js","content.js"]
     }
   ]
 }

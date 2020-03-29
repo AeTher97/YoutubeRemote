@@ -10,4 +10,5 @@ import lombok.Data;
 public class MediaControl {
     private MessageType messageType;
     private Action action;
+    private Integer timeSet;
 }

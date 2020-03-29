@@ -4,11 +4,11 @@ function handleMediaControl(message) {
     executeControlCommand(message);
 }
 
+function handleQueueControl(message) {
+    executeQueueControlCommand(message);
+}
+
 function handleSetReceiver(message) {
-    if (message.deviceName === deviceName) {
-        isReceiver = true;
-    } else {
-        isReceiver = false;
-    }
+    isReceiver = message.deviceName === deviceName;
     emitAllStates();
 }

@@ -5,16 +5,21 @@ import com.urzednicza.youtuberemotebackend.enums.MemberType;
 import com.urzednicza.youtuberemotebackend.models.MemberSession;
 import com.urzednicza.youtuberemotebackend.models.RemoteSession;
 import com.urzednicza.youtuberemotebackend.models.User;
+import com.urzednicza.youtuberemotebackend.models.messages.server.Error;
 import lombok.extern.log4j.Log4j;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import sun.rmi.server.InactiveGroupException;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Log4j
+@EnableScheduling
 public class WebSocketSessionManager {
 
     private Map<User, RemoteSession> remoteSessions;
@@ -50,5 +55,47 @@ public class WebSocketSessionManager {
             }
         }
         return null;
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void garbageCollectSessions()  {
+        int deletedMemberSessions = 0;
+        int deletedRemoteSessions = 0;
+        log.info("Collecting garbage sessions." + new Date().toString());
+
+        List<User> removedRemoteSessions = new ArrayList<>();
+        for (Map.Entry<User, RemoteSession> remoteSession : remoteSessions.entrySet()) {
+            List<String> removedMemberSessions = new ArrayList<>();
+            for (Map.Entry<String, MemberSession> memberSession : remoteSession.getValue().getMemberSessions().entrySet()) {
+                if (new Date().getTime() - memberSession.getValue().getLastActive().getTime() > 60000) {
+                    sendError(new InactiveGroupException("This session was inactive for too long"), memberSession.getValue().getWebSocketSession());
+                    removedMemberSessions.add(memberSession.getKey());
+                    deletedMemberSessions++;
+                }
+            }
+            for (String id : removedMemberSessions) {
+                    remoteSession.getValue().removeMemberSession(id);
+
+            }
+
+            if (remoteSession.getValue().getMemberSessions().size() == 0) {
+                removedRemoteSessions.add(remoteSession.getKey());
+                deletedRemoteSessions++;
+            }
+        }
+
+        for (User user : removedRemoteSessions) {
+            remoteSessions.remove(user);
+        }
+        log.info("Garbage collected " + deletedRemoteSessions + " remote sessions and " + deletedMemberSessions + " member sessions");
+        log.info("Remaining sessions " + remoteSessions.size());
+    }
+
+    private void sendError(Exception e, WebSocketSession webSocketSession) {
+        try {
+            webSocketSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(new Error(e.getMessage()))));
+        }catch (IOException ev){
+            log.error("Failed sending error message");
+        }
     }
 }

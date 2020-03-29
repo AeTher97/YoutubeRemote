@@ -36,6 +36,7 @@ public class RemoteSession {
         MemberSession memberSession = new MemberSession();
         memberSession.setMemberType(memberType);
         memberSession.setWebSocketSession(webSocketSession);
+        memberSession.setDeviceName(deviceName);
 
         memberSessions.put(deviceName, memberSession);
 
@@ -49,21 +50,21 @@ public class RemoteSession {
         notifyReceivers();
     }
 
-    public void removeMemberSession(String deviceName) throws IOException {
-
-        boolean isReceiver = memberSessions.get(deviceName).getMemberType().equals(MemberType.RECEIVER);
+    public void removeMemberSession(String deviceName) {
+        if (memberSessions.get(deviceName) == null) {
+            log.error("This session doesn't exist");
+        }
         if (memberSessions.get(deviceName).equals(mediaPlayer)) {
             mediaPlayer = null;
         }
         memberSessions.remove(deviceName);
         if (!getReceiversNames().isEmpty() && mediaPlayer == null) {
             mediaPlayer = memberSessions.get(getReceiversNames().get(0));
-            if (isReceiver) {
-                emitReceivers();
-            }
-            notifyReceivers();
-
         }
+
+        notifyReceivers();
+        emitReceivers();
+
     }
 
     public MemberSession getMemberSession(String deviceName) {
@@ -123,44 +124,61 @@ public class RemoteSession {
         return memberSessions.values().stream().filter(memberSession -> memberSession.getMemberType().equals(MemberType.CONTROLLER)).collect(Collectors.toList());
     }
 
-    private void notifyReceivers() throws JsonProcessingException {
-        CurrentReceiver currentReceiver = new CurrentReceiver();
-        if (mediaPlayer != null) {
-            currentReceiver.setDeviceName(getMemberSessionDeviceName(mediaPlayer.getWebSocketSession()));
-        } else {
-            currentReceiver.setDeviceName(null);
+    private void notifyReceivers() {
+        try {
+            CurrentReceiver currentReceiver = new CurrentReceiver();
+            if (mediaPlayer != null) {
+                currentReceiver.setDeviceName(getMemberSessionDeviceName(mediaPlayer.getWebSocketSession()));
+            } else {
+                currentReceiver.setDeviceName(null);
+            }
+
+            TextMessage message = new TextMessage(objectMapper.writeValueAsString(currentReceiver));
+            getReceiversNames().forEach(receiver -> {
+                try {
+                    getMemberSession(receiver).getWebSocketSession().sendMessage(message);
+                } catch (IllegalStateException e) {
+                    log.error("Failed to emit receivers to one of the sessions");
+                    removeMemberSession(receiver);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            });
+
+            getControllers().forEach(controller -> {
+                try {
+                    controller.getWebSocketSession().sendMessage(message);
+                } catch (IllegalStateException e) {
+                    log.error("Failed to emit receivers to one of the sessions");
+                    removeMemberSession(controller.getDeviceName());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (JsonProcessingException e) {
+            log.error("Failed writing message");
         }
-
-        TextMessage message = new TextMessage(objectMapper.writeValueAsString(currentReceiver));
-        getReceiversNames().forEach(receiver -> {
-            try {
-                getMemberSession(receiver).getWebSocketSession().sendMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        });
-
-        getControllers().forEach(controller -> {
-            try {
-                controller.getWebSocketSession().sendMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
     }
 
-    private void emitReceivers() throws JsonProcessingException {
+    private void emitReceivers() {
         Receivers receivers = new Receivers();
         receivers.setReceivers(getReceivers());
-        TextMessage receiversMessage = new TextMessage(objectMapper.writeValueAsString(receivers));
+        try {
+            TextMessage receiversMessage = new TextMessage(objectMapper.writeValueAsString(receivers));
 
-        getControllers().forEach(controller -> {
-            try {
-                controller.getWebSocketSession().sendMessage(receiversMessage);
-            } catch (IOException e) {
-                log.error("Failed to emit receivers");
-            }
-        });
+            getControllers().forEach(controller -> {
+                try {
+                    controller.getWebSocketSession().sendMessage(receiversMessage);
+                } catch (IllegalStateException e) {
+                    log.error("Failed to emit receivers to one of the sessions");
+                    removeMemberSession(controller.getDeviceName());
+                } catch (IOException e) {
+                    log.error("Failed to emit receivers");
+                }
+            });
+        } catch (JsonProcessingException e) {
+            log.error("Failed writing message");
+        }
     }
 }

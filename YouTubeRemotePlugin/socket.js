@@ -12,6 +12,9 @@ function initializeWebSocket(address,deviceName)
         if (message.messageType === "MEDIA_CONTROL") {
             handleMediaControl(message);
         }
+        if (message.messageType === "QUEUE_CONTROL") {
+            handleQueueControl(message);
+        }
         if (message.messageType === "CURRENT_RECEIVER") {
             handleSetReceiver(message);
         }

@@ -3,7 +3,9 @@ package com.urzednicza.youtuberemotebackend.websocket;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.corba.se.spi.activation.InitialNameServicePackage.NameAlreadyBound;
+import com.sun.xml.internal.ws.client.ClientTransportException;
 import com.urzednicza.youtuberemotebackend.enums.MessageType;
+import com.urzednicza.youtuberemotebackend.models.MemberSession;
 import com.urzednicza.youtuberemotebackend.models.RemoteSession;
 import com.urzednicza.youtuberemotebackend.models.User;
 import com.urzednicza.youtuberemotebackend.models.messages.client.BasicMessage;
@@ -14,11 +16,13 @@ import com.urzednicza.youtuberemotebackend.models.messages.server.Error;
 import com.urzednicza.youtuberemotebackend.service.WebSocketSessionManager;
 import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
+import org.omg.CORBA.portable.UnknownException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -60,8 +64,8 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
         user.setUsername("Marek");
 
         BasicMessage basicMessage = objectMapper.readValue(message.getPayload().toString(), BasicMessage.class);
-
         MessageType messageType = basicMessage.getMessageType();
+
 
         if (messageType == null) {
             log.debug("Message type is null no action performed");
@@ -78,6 +82,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
                 handleStart(message, webSocketSession, user);
                 break;
             case MEDIA_CONTROL:
+            case QUEUE_CONTROL:
                 handleMediaControl(message, user, webSocketSession);
                 break;
             case SET_RECEIVER:
@@ -85,6 +90,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
                 break;
             case CONTROLS_SONG:
             case CONTROLS_TIME:
+            case CONTROLS_DETAILS:
             case QUEUE:
                 handleMediaState(message, user, webSocketSession);
                 break;
@@ -93,16 +99,18 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
                 break;
         }
 
-
+        updateLastSeen(user, webSocketSession);
     }
 
     @Override
-    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable) throws Exception {
+    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable)  {
         log.error("Transport error");
+        System.out.println(throwable.getMessage());
+
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
+    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus)  {
 
         log.debug("Closed session with: " + webSocketSession.getId());
         RemoteSession remoteSession = webSocketSessionManager.getRemoteSessionByMemberSession(webSocketSession);
@@ -117,6 +125,20 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
     @Override
     public boolean supportsPartialMessages() {
         return false;
+    }
+
+    private void updateLastSeen(User user, WebSocketSession webSocketSession) {
+        RemoteSession remoteSession = webSocketSessionManager.getRemoteSession(user);
+        if (remoteSession == null) {
+            log.debug("Remote session doesn't exist");
+            return;
+        }
+        MemberSession memberSession = remoteSession.getMemberSession(remoteSession.getMemberSessionDeviceName(webSocketSession));
+        if (memberSession == null) {
+            log.debug("Member session doesn't exist");
+            return;
+        }
+        memberSession.setLastActive(new Date());
     }
 
     private void handleStart(WebSocketMessage<?> message, WebSocketSession webSocketSession, User user) throws IOException {
@@ -153,13 +175,15 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
     }
 
 
-    private void handleMediaState(WebSocketMessage<?> message, User user, WebSocketSession webSocketSession) throws IOException {
+    private void handleMediaState(WebSocketMessage<?> message, User user, WebSocketSession webSocketSession) {
         webSocketSessionManager.getRemoteSession(user).getControllers().forEach(
                 controller -> {
                     try {
                         controller.getWebSocketSession().sendMessage(message);
-                    } catch (IOException e) {
-                        log.error("Failed to send media state to controller: " + controller.getWebSocketSession());
+                    } catch (IllegalStateException | IOException e) {
+                        log.error("Failed to emit receivers to one of the controllers");
+                        webSocketSessionManager.getRemoteSession(user).removeMemberSession(controller.getDeviceName());
+                        log.error(e.getMessage());
                     }
                 }
         );
