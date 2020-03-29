@@ -59,6 +59,11 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 }
 
 {
+  "messageType" : "CONTROLS_DETAILS",
+  "content" : {volume: 69, repeatType: 'NO_REPEAT'}//{REPEAT_ALL,REPEAT_ONE} }
+}
+
+{
   "messageType" : "STOP",
   "deviceName" : "my-phone"
 }
@@ -97,6 +102,11 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 {
   "messageType" : "CONTROLS_SONG",
   "content" : {title: '', performer: '', imgSrc: ''}
+}
+
+{
+  "messageType" : "CONTROLS_DETAILS",
+  "content" : {volume: 69, repeatType: 'NO_REPEAT'}//{REPEAT_ALL,REPEAT_ONE} }
 }
 
 
