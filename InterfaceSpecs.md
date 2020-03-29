@@ -11,8 +11,8 @@
 
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS},
-  "timeSet" : 125
+  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS, SET_TIME},
+  "timeSet" : 125 //optional(required in case of set time)
 }
 
 {
@@ -73,8 +73,8 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS},
-  "timeSet" : 125
+  "action" : "PLAY" //{PAUSE, NEXT, PREVIOUS, SET_TIME},
+  "timeSet" : 125 //optional(required in case of set time)
 }
 
 {
