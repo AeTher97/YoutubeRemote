@@ -4,8 +4,8 @@ import ReceiversMessage, { Receiver } from '../messages/server-messages/Receiver
 import { MessageType } from '../messages/MessageType';
 import ControlsTimeMessage from '../messages/server-messages/ControlsTimeMessage';
 import ControlsSongMessage from '../messages/server-messages/ControlsSongMessage';
-import React from 'react';
 import Subscription from '../utils/Subscription';
+import { QueueMessage, SongInQueue } from '../messages/server-messages/QueueMessage';
 
 class SongInfo {
     songLengthInSeconds: number;
@@ -13,12 +13,14 @@ class SongInfo {
     title: string;
     performer: string;
     imageSource: string;
+    largeImageSource: string;
     playing: boolean;
 }
 
 export class Storage {
     public availableReceivers: Receiver[] = [];
     public selectedSong: SongInfo = new SongInfo();
+    public queue: SongInQueue[] = [];
 }
 
 export class StorageService {
@@ -42,11 +44,13 @@ export class StorageService {
         this.storage.selectedSong.title = msg.content.title;
         this.storage.selectedSong.performer = msg.content.performer;
         this.storage.selectedSong.imageSource = msg.content.imgSrc;
+        this.storage.selectedSong.largeImageSource = msg.content.imgSrcLarge;
         this.onChange();
     }
-
-    private getHexId(): string {
-        return Number(Math.floor(Math.random() * 15000000 + 0x111111)).toString(16);
+    
+    private handleQueueInformation(msg: QueueMessage): void {
+        this.storage.queue = msg.content;
+        this.onChange();
     }
 
     private onChange(): void {
@@ -66,8 +70,7 @@ export class StorageService {
         messageService.subscribe<ReceiversMessage>(MessageType.RECEIVERS, msg => this.handleReceiversMessage(msg));
         messageService.subscribe<ControlsSongMessage>(MessageType.CONTROLS_SONG, msg => this.handleSongInformation(msg));
         messageService.subscribe<ControlsTimeMessage>(MessageType.CONTROLS_TIME, msg => this.handleTimeSongInformation(msg));
-
-        messageService.sendMessage(new StartMessage('Phone:' + this.getHexId()));
+        messageService.subscribe<QueueMessage>(MessageType.QUEUE, msg => this.handleQueueInformation(msg));
     }
 }
 

@@ -33,7 +33,7 @@ export default class SelectedSongBar extends Component<{}, SelectedSongBarState>
         );
     }
 
-    private createStateFromStorage(storage:Storage): SelectedSongBarState {
+    private createStateFromStorage(storage: Storage): SelectedSongBarState {
         return {
             isSongSelected: !!storage.selectedSong.title,
             secondsPassed: storage.selectedSong.secondsPassed,

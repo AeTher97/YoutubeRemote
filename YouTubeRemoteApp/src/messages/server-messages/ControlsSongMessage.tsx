@@ -5,6 +5,7 @@ export class SongInfo {
     title: string;
     performer: string;
     imgSrc: string;
+    imgSrcLarge: string;
 }
 
 export default class ControlsSongMessage implements IMessage {
