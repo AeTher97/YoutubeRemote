@@ -1,11 +1,11 @@
 import messageService from './MessageService';
-import StartMessage from '../messages/client-messages/StartMessage';
-import ReceiversMessage, { Receiver } from '../messages/server-messages/ReceiversMessage';
-import { MessageType } from '../messages/MessageType';
+import ReceiversMessage, {Receiver} from '../messages/server-messages/ReceiversMessage';
+import {MessageType} from '../messages/MessageType';
 import ControlsTimeMessage from '../messages/server-messages/ControlsTimeMessage';
 import ControlsSongMessage from '../messages/server-messages/ControlsSongMessage';
 import Subscription from '../utils/Subscription';
-import { QueueMessage, SongInQueue } from '../messages/server-messages/QueueMessage';
+import {QueueMessage, SongInQueue} from '../messages/server-messages/QueueMessage';
+import HomeMessage, {HomeInfo} from "../messages/server-messages/HomeMessage";
 
 class SongInfo {
     songLengthInSeconds: number;
@@ -17,10 +17,12 @@ class SongInfo {
     playing: boolean;
 }
 
+
 export class Storage {
     public availableReceivers: Receiver[] = [];
     public selectedSong: SongInfo = new SongInfo();
     public queue: SongInQueue[] = [];
+    public homeInfo: HomeInfo[] = [];
 }
 
 export class StorageService {
@@ -32,7 +34,7 @@ export class StorageService {
         this.storage.availableReceivers = msg.receivers;
         this.onChange();
     }
-    
+
     private handleTimeSongInformation(msg: ControlsTimeMessage): void {
         this.storage.selectedSong.songLengthInSeconds = msg.content.maxTime;
         this.storage.selectedSong.secondsPassed = msg.content.time;
@@ -47,10 +49,19 @@ export class StorageService {
         this.storage.selectedSong.largeImageSource = msg.content.imgSrcLarge;
         this.onChange();
     }
-    
+
+
     private handleQueueInformation(msg: QueueMessage): void {
         this.storage.queue = msg.content;
         this.onChange();
+    }
+
+    public constructor() {
+        messageService.subscribe<ReceiversMessage>(MessageType.RECEIVERS, msg => this.handleReceiversMessage(msg));
+        messageService.subscribe<ControlsSongMessage>(MessageType.CONTROLS_SONG, msg => this.handleSongInformation(msg));
+        messageService.subscribe<ControlsTimeMessage>(MessageType.CONTROLS_TIME, msg => this.handleTimeSongInformation(msg));
+        messageService.subscribe<QueueMessage>(MessageType.QUEUE, msg => this.handleQueueInformation(msg));
+        messageService.subscribe<HomeMessage>(MessageType.HOME, msg => this.handleHomeInformation(msg));
     }
 
     private onChange(): void {
@@ -66,13 +77,12 @@ export class StorageService {
         });
     }
 
-    public constructor() {
-        messageService.subscribe<ReceiversMessage>(MessageType.RECEIVERS, msg => this.handleReceiversMessage(msg));
-        messageService.subscribe<ControlsSongMessage>(MessageType.CONTROLS_SONG, msg => this.handleSongInformation(msg));
-        messageService.subscribe<ControlsTimeMessage>(MessageType.CONTROLS_TIME, msg => this.handleTimeSongInformation(msg));
-        messageService.subscribe<QueueMessage>(MessageType.QUEUE, msg => this.handleQueueInformation(msg));
+    private handleHomeInformation(msg: HomeMessage): void {
+        this.storage.homeInfo = msg.content;
+        this.onChange();
     }
 }
 
-let storageService = new StorageService();;
+let storageService = new StorageService();
+
 export default storageService;

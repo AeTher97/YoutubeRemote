@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import { View } from 'react-native';
+import React, {Component} from 'react';
+import {View} from 'react-native';
 
-import storageService, { Storage } from '../../services/StorageService';
+import storageService, {Storage} from '../../services/StorageService';
 import SongInfo from './SongInfo';
 import PlayButton from './PlayButton';
 import Subscription from '../../utils/Subscription';
@@ -47,7 +47,7 @@ export default class SelectedSongBar extends Component<{}, SelectedSongBarState>
 
     private getElementIfSongIsSelected(): JSX.Element {
         if(!this.state.isSongSelected)
-            return (<></>);
+            return;
         return (
             <>
                 <View style={{ height: '98%', flexDirection: 'row', alignItems: "center", backgroundColor: "#1d1d1d"}}>
