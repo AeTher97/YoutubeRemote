@@ -1,21 +1,7 @@
 import IMessage from "../messages/IMessage";
 import { MessageType } from "../messages/MessageType";
-
-export class MessageSubscription {
-    private onUnsubscribe: () => void;
-    private subscribed: boolean = true;
-
-    public unsubscribe(): void {
-        if(this.subscribed) {
-            this.onUnsubscribe();
-            this.subscribed = false;
-        }
-    }
-
-    public constructor(onUnsubscribe: () => void) {
-        this.onUnsubscribe = onUnsubscribe;
-    }
-}
+import HeartbeatMessage from "../messages/client-messages/HeartbeatMessage";
+import Subscription from "../utils/Subscription";
 
 class SubscriptionCallback {
     public messageType: MessageType;
@@ -34,7 +20,6 @@ export class MessageService {
     private messagesQueued: IMessage[] = [];
 
     private handleMessage(ev: MessageEvent): void {
-        console.log(ev.data);
         const message: IMessage = JSON.parse(ev.data);
         this.subscriptionCallbacks.forEach(c => {
             if(c.messageType === message.messageType)
@@ -49,6 +34,7 @@ export class MessageService {
     }
 
     public sendMessage(message: IMessage): void {
+        console.log(message);
         if(this.webSocket && this.webSocket.readyState === 1) {
             this.webSocket.send(JSON.stringify(message));
         } else {
@@ -56,10 +42,15 @@ export class MessageService {
         }
     }
 
-    public subscribe<T extends IMessage>(messageType: MessageType, callback: (msg: T) => void): MessageSubscription {
+    private sendHeartbeat(): any {
+        this.sendMessage(new HeartbeatMessage());
+        setTimeout(() => this.sendHeartbeat(), 30000);
+    }
+
+    public subscribe<T extends IMessage>(messageType: MessageType, callback: (msg: T) => void): Subscription {
         const subscriptionCallback = new SubscriptionCallback(messageType, callback);
         this.subscriptionCallbacks.push(subscriptionCallback);
-        return new MessageSubscription(() => {
+        return new Subscription(() => {
             this.subscriptionCallbacks = this.subscriptionCallbacks.filter(s => s !== subscriptionCallback);
         });
     }
@@ -69,6 +60,8 @@ export class MessageService {
         this.webSocket.onopen = () => this.sendQueuedMessages();
         this.webSocket.onclose = () => console.log('connection closed');
         this.webSocket.onmessage = ev => this.handleMessage(ev);
+
+        this.sendHeartbeat();
     }
 }
 

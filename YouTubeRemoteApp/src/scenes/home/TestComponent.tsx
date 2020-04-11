@@ -36,17 +36,7 @@ export default class TestComponent extends Component<PomidorProps, PomidorState>
         );
     }
 
-    private handleReceiversMessage(msg: ReceiversMessage): void {
-        console.log('got receivers: ' + msg.receivers);
-    }
-
-    private getHexId(): string {
-        return Number(Math.random() * 15000000 + 0x111111).toString(16);
-    }
-
     private init(): void {
         this.state = {testNumber: 0};
-        messageService.subscribe(MessageType.RECEIVERS, this.handleReceiversMessage);
-        messageService.sendMessage(new StartMessage('Phone:' + this.getHexId()));
     }
 }
