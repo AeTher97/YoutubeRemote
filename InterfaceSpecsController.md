@@ -59,7 +59,7 @@
 
 {
   "messageType" : "CONTROLS_SONG",
-  "content" : {title: '', performer: '', imgSrc: ''}
+  "content" : {title: '', performer: '', imgSrc: '', imgSrcLarge: ''}
 }
 
 {
