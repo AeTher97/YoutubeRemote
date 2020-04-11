@@ -20,8 +20,8 @@
 {
   "messageType" : "QUEUE_CONTROL",
   "action" : "MOVE" //{REMOVE,NEXT, PREVIOUS},
-  "currentIndex": 12,
-  "targetIndex": 3
+  "currentIndex": 12, //optional(required in case of MOVE)
+  "targetIndex": 3 //optional(required in case of MOVE and REMOVE)
 }
 
 
@@ -99,8 +99,8 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 {
   "messageType" : "QUEUE_CONTROL",
   "action" : "MOVE" //{REMOVE,NEXT, PREVIOUS},
-  "currentIndex": 12,
-  "targetIndex": 3
+  "currentIndex": 12, //optional(required in case of MOVE)
+  "targetIndex": 3 //optional(required in case of MOVE and REMOVE)
 }
 
 {
