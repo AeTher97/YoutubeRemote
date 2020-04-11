@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { Icon } from 'react-native-elements';
 
 import messageService from '../../services/MessageService';
-import MediaControlMessage, { MediaControlAction } from '../../messages/client-messages/MediaControlMessage';
+import { PlaySongMessage, PauseSongMessage } from '../../messages/client-messages/MediaControlMessage';
 import storageService from '../../services/StorageService';
 import Subscription from '../../utils/Subscription';
 
@@ -38,9 +38,9 @@ export default class PlayButton extends Component<{}, PlayButtonState> {
 
     private togglePlaying(): void {
         if(this.state.isSongPlaying)
-            messageService.sendMessage(new MediaControlMessage(MediaControlAction.PAUSE));
+            messageService.sendMessage(new PauseSongMessage());
         else
-            messageService.sendMessage(new MediaControlMessage(MediaControlAction.PLAY));
+            messageService.sendMessage(new PlaySongMessage());
     }
 
     private getCurrentIconName(): string {
