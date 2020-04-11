@@ -2,11 +2,13 @@ let queueLastFired = new Date();
 let titleLastFired = new Date();
 let timeLastFired = new Date();
 let detailsLastFired = new Date();
+let homeLastFired = new Date();
 
 let queueFired = false;
 let titleFired = false;
 let timeFired = false;
 let detailsFired = false;
+let homeFired = false;
 
 const config = {attributes: true, characterData: true, subtree: true, childList: true};
 
@@ -42,8 +44,13 @@ function addTimeObserver(callback, threshold) {
 }
 
 function addDetailsObserver(callback, threshold) {
-    const time = document.querySelector("#right-controls");
-    createObserver(time, config, detailsLastFired, detailsFired, threshold, callback);
+    const details = document.querySelector("#right-controls");
+    createObserver(details, config, detailsLastFired, detailsFired, threshold, callback);
+}
+
+function addHomeObserver(callback, threshold) {
+    const home = document.querySelector("#browse-page > ytmusic-section-list-renderer").children[1];
+    createObserver(home, config, homeLastFired, homeFired, threshold, callback);
 }
 
 function initializeObservers(threshold = 750) {
@@ -92,6 +99,21 @@ function initializeObservers(threshold = 750) {
                 emitState("CONTROLS_DETAILS", detailsStateWrapper.detailsState)
             }
         }, 1000);
-    }, threshold)
+    }, threshold);
+
+    const interval = setInterval(() => {
+        if(document.querySelector("#browse-page > ytmusic-section-list-renderer") !== null){
+            clearInterval(interval);
+            console.log("intrea");
+            emitState("HOME", getHomeState());
+            addHomeObserver(() => {
+                console.log('Home event');
+                setTimeout(() => {
+                    emitState('HOME',getHomeState())
+                },500)
+            },threshold)
+        }
+    },100)
+
 }
 

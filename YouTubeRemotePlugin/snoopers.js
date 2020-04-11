@@ -1,5 +1,5 @@
 let oldQueue = {songs: []};
-let oldCurrentSong = {title: '', performer: '', imgSrc: ''};
+let oldCurrentSong = {title: '', performer: '', imgSrc: '', imgSrcLarge: ''};
 let oldCurrentTime = {
     playing: false,
     time: 0,
@@ -9,6 +9,8 @@ let oldDetailsState = {
     volume: 0,
     repeatType: "REPEAT_OFF"
 };
+
+let home = [];
 
 
 function getTimeState() {
@@ -47,7 +49,7 @@ function getTimeState() {
 
 function getSongState() {
     try {
-        const songState = {title: '', performer: '', imgSrc: ''};
+        const songState = {title: '', performer: '', imgSrc: '', imgSrcLarge: ''};
         let foundTitle = document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div.content-info-wrapper.style-scope.ytmusic-player-bar > yt-formatted-string");
         let foundPerformer = document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div.content-info-wrapper.style-scope.ytmusic-player-bar > span > span.subtitle.style-scope.ytmusic-player-bar > yt-formatted-string:nth-child(1)");
 
@@ -57,6 +59,7 @@ function getSongState() {
         songState.title = foundTitle.title;
 
         songState.imgSrc = document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > img").getAttribute('src');
+        songState.imgSrcLarge = document.querySelector("#player-page").children[0].children[0].children[0].children[1].children[0].children[0].getAttribute('src');
 
         const changed = oldCurrentSong !== songState;
         oldCurrentSong = songState;
@@ -110,7 +113,7 @@ function getDetailsState() {
 
         const repeatAttribute = document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar").children[0].children[0].children[0].children[0].getAttribute('d');
 
-        if (repeatAttribute === repeatOffString && document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar").getAttribute('aria-label')!=="Repeat all") {
+        if (repeatAttribute === repeatOffString && document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar").getAttribute('aria-label') !== "Repeat all") {
             detailsState.repeatType = "REPEAT_OFF"
         } else if (repeatAttribute === repeatAllString) {
             detailsState.repeatType = "REPEAT_ALL"
@@ -143,6 +146,54 @@ function getDetailsState() {
         return null;
     }
 
+}
+
+function getHomeState() {
+    const allBars = document.querySelector("#browse-page > ytmusic-section-list-renderer").children[1].children;
+
+
+    let content = [];
+
+    for (let i = 0; i < allBars.length; i++) {
+        let barObject = {
+            index: i,
+            header: '',
+            content: []
+        };
+        if (allBars[i].children[0].children[1].children[1] !== undefined) {
+
+            barObject.header = allBars[i].children[0].children[1].children[1].children[0].innerHTML;
+
+            let elements = allBars[i].children[1].children[1].children[0].children;
+
+
+            for (let j = 0; j < elements.length; j++) {
+
+                let elementObject = {
+                    title: '',
+                    subText: '',
+                    imgSrc: '',
+                    type: ''
+                };
+                if (elements[j] !== undefined) {
+
+                    if (elements[j].children[0].children[0].getAttribute('thumbnail-crop_') === "MUSIC_THUMBNAIL_CROP_UNSPECIFIED") {
+                        elementObject.type = "SQUARE"
+                    } else {
+                        elementObject.type = "CIRCLE";
+                    }
+                    elementObject.imgSrc = elements[0].children[0].children[0].children[0].children[0].getAttribute('src');
+                    elementObject.title = elements[j].children[1].children[0].innerText;
+                    elementObject.subText = elements[j].children[1].children[1].children[1].innerText;
+                    barObject.content.push(elementObject);
+                }
+            }
+            content.push(barObject);
+        }
+
+    }
+
+    return content;
 }
 
 function getWholeQueue() {
