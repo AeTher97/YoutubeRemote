@@ -57,6 +57,11 @@ public class RemoteSession {
         if (memberSessions.get(deviceName).equals(mediaPlayer)) {
             mediaPlayer = null;
         }
+        try {
+            memberSessions.get(deviceName).getWebSocketSession().close();
+        } catch (IOException e) {
+            log.error("Failed to close session");
+        }
         memberSessions.remove(deviceName);
         if (!getReceiversNames().isEmpty() && mediaPlayer == null) {
             mediaPlayer = memberSessions.get(getReceiversNames().get(0));

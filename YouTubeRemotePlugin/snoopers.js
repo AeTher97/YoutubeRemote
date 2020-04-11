@@ -110,7 +110,7 @@ function getDetailsState() {
 
         const repeatAttribute = document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar").children[0].children[0].children[0].children[0].getAttribute('d');
 
-        if (repeatAttribute === repeatOffString) {
+        if (repeatAttribute === repeatOffString && document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar").getAttribute('aria-label')!=="Repeat all") {
             detailsState.repeatType = "REPEAT_OFF"
         } else if (repeatAttribute === repeatAllString) {
             detailsState.repeatType = "REPEAT_ALL"

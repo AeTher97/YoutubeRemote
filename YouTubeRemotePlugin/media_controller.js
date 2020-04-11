@@ -20,6 +20,10 @@ function executeControlCommand(message) {
             break;
         case 'SHUFFLE' :
             shuffle();
+            break;
+        case 'REPEAT' :
+            setRepeat(message.repeatSet);
+
     }
 }
 
@@ -50,6 +54,20 @@ function setTime(timeSet) {
 function setVolume(volumeSet) {
     exposeDetailControls();
     clickOnVolumeBarAtVolume(volumeSet);
+}
+
+
+function setRepeat(repeatSet) {
+    exposeDetailControls();
+    const button = document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar");
+    let counter = 0;
+
+    while (oldDetailsState.repeatType !== repeatSet && counter < 5) {
+        button.click();
+        counter++;
+        setTimeout(() => {
+        }, 300);
+    }
 }
 
 function shuffle() {
@@ -85,7 +103,7 @@ function calculateHorizontalProgressClickPosition(setTime) {
 }
 
 function calculateHorizontalVolumeClickPosition(volume) {
-    let proportion = volume / oldCurrentTime.maxTime;
+    let proportion = volume / 100;
     if (proportion < 0) {
         proportion = 0;
     } else if (proportion > 1) {
@@ -93,10 +111,14 @@ function calculateHorizontalVolumeClickPosition(volume) {
     }
 
     let bodyRect = document.body.getBoundingClientRect();
-    let elementRect = document.querySelector("#volume-slider").getBoundingClientRect();
-    let positionY = elementRect.top - bodyRect.top;
-    let width = document.querySelector("#volume-slider").getBoundingClientRect().width;
-    let positionX = Math.floor(width * proportion) + document.querySelector("#volume-slider").getBoundingClientRect().x;
+    let elementRect = document.querySelector("#sliderContainer > div.bar-container.style-scope.paper-slider").getBoundingClientRect();
+    let positionY = elementRect.top - bodyRect.top + 15;
+
+    if (volume === 0) {
+        proportion = 2 / 100
+    }
+    let width = document.querySelector("#sliderContainer > div.bar-container.style-scope.paper-slider").getBoundingClientRect().width;
+    let positionX = Math.floor(width * proportion) + document.querySelector("#volume-slider").getBoundingClientRect().x + 15;
     return [positionX, positionY];
 
 }
@@ -117,9 +139,10 @@ function click(x, y) {
 
 
 function exposeDetailControls() {
-    document.querySelector("#expanding-menu").setAttribute("aria-hidden", false);
-    document.querySelector("#expanding-menu").setAttribute("style", "outline: none; opacity: 0; box-sizing: border-box; max-height: 32px; max-width: 300px; display: z-index: 103;");
+    // document.querySelector("#expanding-menu").setAttribute("aria-hidden", false);
+    // document.querySelector("#expanding-menu").setAttribute("style", "outline: none; opacity: 0; box-sizing: border-box; max-height: 32px; max-width: 300px; display: z-index: 103;");
     document.querySelector("#volume-slider").setAttribute("class", "volume-slider style-scope ytmusic-player-bar on-hover")
+    document.querySelector("#layout").setAttribute('show-fullscreen-controls_', '')
 }
 
 function fireQueueEvent() {

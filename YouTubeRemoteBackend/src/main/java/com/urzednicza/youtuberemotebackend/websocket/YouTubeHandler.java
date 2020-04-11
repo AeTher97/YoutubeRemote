@@ -3,7 +3,6 @@ package com.urzednicza.youtuberemotebackend.websocket;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.corba.se.spi.activation.InitialNameServicePackage.NameAlreadyBound;
-import com.sun.xml.internal.ws.client.ClientTransportException;
 import com.urzednicza.youtuberemotebackend.enums.MessageType;
 import com.urzednicza.youtuberemotebackend.models.MemberSession;
 import com.urzednicza.youtuberemotebackend.models.RemoteSession;
@@ -16,7 +15,6 @@ import com.urzednicza.youtuberemotebackend.models.messages.server.Error;
 import com.urzednicza.youtuberemotebackend.service.WebSocketSessionManager;
 import javassist.NotFoundException;
 import lombok.extern.log4j.Log4j;
-import org.omg.CORBA.portable.UnknownException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
@@ -69,6 +67,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
 
         if (messageType == null) {
             log.debug("Message type is null no action performed");
+            sendError(new IllegalStateException("Message type is null no action performed"), webSocketSession);
             return;
         }
 

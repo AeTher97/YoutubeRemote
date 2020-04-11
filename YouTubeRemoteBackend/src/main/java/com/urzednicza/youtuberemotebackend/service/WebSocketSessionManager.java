@@ -68,7 +68,7 @@ public class WebSocketSessionManager {
             List<String> removedMemberSessions = new ArrayList<>();
             for (Map.Entry<String, MemberSession> memberSession : remoteSession.getValue().getMemberSessions().entrySet()) {
                 if (new Date().getTime() - memberSession.getValue().getLastActive().getTime() > 60000) {
-                    sendError(new InactiveGroupException("This session was inactive for too long"), memberSession.getValue().getWebSocketSession());
+                    sendError(new InactiveGroupException("This session was inactive for too long!"), memberSession.getValue().getWebSocketSession());
                     removedMemberSessions.add(memberSession.getKey());
                     deletedMemberSessions++;
                 }
@@ -88,7 +88,7 @@ public class WebSocketSessionManager {
             remoteSessions.remove(user);
         }
         log.info("Garbage collected " + deletedRemoteSessions + " remote sessions and " + deletedMemberSessions + " member sessions");
-        log.info("Remaining sessions " + remoteSessions.size());
+        log.info("Remaining remote sessions " + remoteSessions.size());
     }
 
     private void sendError(Exception e, WebSocketSession webSocketSession) {
