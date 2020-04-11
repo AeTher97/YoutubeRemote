@@ -22,7 +22,6 @@ export class MessageService {
 
     private handleMessage(ev: MessageEvent): void {
         const message: IMessage = JSON.parse(ev.data);
-        console.log(message);
         this.subscriptionCallbacks.forEach(c => {
             if(c.messageType === message.messageType)
                 c.callback(message);

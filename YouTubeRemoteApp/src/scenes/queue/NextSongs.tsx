@@ -12,7 +12,7 @@ export default class NextSongs extends Component {
   public render(): JSX.Element {
     return (
       <>
-        <View style={{height: '70%', backgroundColor: "#2d2d2d"}}/>
+        <View style={{height: '10%', backgroundColor: "#2d2d2d"}}/>
       </>
     );
   }

@@ -68,7 +68,6 @@ export default class SongInfo extends Component<{}, SongInfoState> {
     }
 
     private goToQueueView(): void {
-        console.log('goToQueueView');
         Actions.jump('queue');
     }
 
