@@ -1,38 +1,49 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, Image, TouchableWithoutFeedback } from 'react-native';
 
-import { Actions } from 'react-native-router-flux';
-
-import messageService, { MessageSubscription } from '../../services/MessageService';
-import { MessageType } from '../../messages/MessageType';
-import ControlsSongMessage from '../../messages/server-messages/ControlsSongMessage';
-import ControlsTimeMessage from '../../messages/server-messages/ControlsTimeMessage';
 import { Icon } from 'react-native-elements';
 
-class PlayButtonProps {
-    playing: boolean;
-    onClick: () => void;
+import messageService from '../../services/MessageService';
+import MediaControlMessage, { MediaControlAction } from '../../messages/client-messages/MediaControlMessage';
+import storageService from '../../services/StorageService';
+import Subscription from '../../utils/Subscription';
+
+class PlayButtonState {
+    isSongPlaying: boolean
 }
 
-export default class PlayButton extends Component<PlayButtonProps> {
+export default class PlayButton extends Component<{}, PlayButtonState> {
+    private storageSubscription: Subscription;
 
-    public constructor(props: PlayButtonProps) {
+    public constructor(props: {}) {
         super(props);
+        this.state = {isSongPlaying: storageService.storage.selectedSong.playing};
+        this.storageSubscription = storageService.subscribe(storage => this.setState({isSongPlaying: storage.selectedSong.playing}));
+    }
+
+    public componentWillUnmount(): void {
+        this.storageSubscription.unsubscribe();
     }
 
     public render(): JSX.Element {
         return (
             <Icon 
-                        name={this.getCurrentIconName()}
-                        type='material'
-                        color='#fff'
-                        underlayColor='#0000'
-                        onPress={this.props.onClick}
-                        size={30}/>
+                name={this.getCurrentIconName()}
+                type='material'
+                color='#fff'
+                underlayColor='#0000'
+                onPress={() => this.togglePlaying()}
+                size={30}/>
         );
     }
 
+    private togglePlaying(): void {
+        if(this.state.isSongPlaying)
+            messageService.sendMessage(new MediaControlMessage(MediaControlAction.PAUSE));
+        else
+            messageService.sendMessage(new MediaControlMessage(MediaControlAction.PLAY));
+    }
+
     private getCurrentIconName(): string {
-        return this.props.playing ? 'pause' : 'play-arrow';
+        return this.state.isSongPlaying ? 'pause' : 'play-arrow';
     }
 }

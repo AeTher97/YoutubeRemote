@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import CurrentSong from './CurrentSong';
-import NextSongs from './NextSongs';
+import { Actions } from 'react-native-router-flux';
 
-export default class Queue extends Component {
+export default class NextSongs extends Component {
+
   public constructor(props: {}) {
     super(props);
   }
@@ -12,8 +12,7 @@ export default class Queue extends Component {
   public render(): JSX.Element {
     return (
       <>
-        <CurrentSong/>
-        <NextSongs/>
+        <View style={{height: '70%', backgroundColor: "#2d2d2d"}}/>
       </>
     );
   }
