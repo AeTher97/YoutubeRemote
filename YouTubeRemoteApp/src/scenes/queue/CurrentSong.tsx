@@ -1,20 +1,42 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Image, ImageBackground } from 'react-native';
+import storageService, { Storage } from '../../services/StorageService';
+import Subscription from '../../utils/Subscription';
 
-import { Actions } from 'react-native-router-flux';
+class CurrentSongState {
+  imageSource: string;
+}
 
-export default class CurrentSong extends Component {
+export default class CurrentSong extends Component<{}, CurrentSongState> {
+
+  private storageSubscription: Subscription;
 
   public constructor(props: {}) {
-    super(props);
+      super(props);
+      this.state = this.createStateFromStorage(storageService.storage);
+      this.storageSubscription = storageService.subscribe(storage => this.setState(this.createStateFromStorage(storage)));
+  }
+
+  public componentWillUnmount(): void {
+      this.storageSubscription.unsubscribe();
   }
 
   public render(): JSX.Element {
     return (
       <>
-        <View style={{height: '30%', backgroundColor: "#1d1d1d"}}/>
+        <View style={{height: '40%', backgroundColor: "#1d1d1d", justifyContent: 'center'}}>
+          <ImageBackground source={{uri: this.state.imageSource}} style={{aspectRatio: 1, width:'100%'}}>
+            <View style={{flex: 1, backgroundColor: 'rgba(0,0,0,0.5)'}}/>
+          </ImageBackground>
+        </View>
       </>
     );
+  }
+
+  createStateFromStorage(storage: Storage): CurrentSongState {
+    return {
+      imageSource: storage.selectedSong.largeImageSource
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import IMessage from "../messages/IMessage";
 import { MessageType } from "../messages/MessageType";
 import HeartbeatMessage from "../messages/client-messages/HeartbeatMessage";
 import Subscription from "../utils/Subscription";
+import StartMessage from "../messages/client-messages/StartMessage";
 
 class SubscriptionCallback {
     public messageType: MessageType;
@@ -21,6 +22,7 @@ export class MessageService {
 
     private handleMessage(ev: MessageEvent): void {
         const message: IMessage = JSON.parse(ev.data);
+        console.log(message);
         this.subscriptionCallbacks.forEach(c => {
             if(c.messageType === message.messageType)
                 c.callback(message);
@@ -34,7 +36,6 @@ export class MessageService {
     }
 
     public sendMessage(message: IMessage): void {
-        console.log(message);
         if(this.webSocket && this.webSocket.readyState === 1) {
             this.webSocket.send(JSON.stringify(message));
         } else {
@@ -45,6 +46,10 @@ export class MessageService {
     private sendHeartbeat(): any {
         this.sendMessage(new HeartbeatMessage());
         setTimeout(() => this.sendHeartbeat(), 30000);
+    }
+
+    private getHexId(): string {
+        return Number(Math.floor(Math.random() * 15000000 + 0x111111)).toString(16);
     }
 
     public subscribe<T extends IMessage>(messageType: MessageType, callback: (msg: T) => void): Subscription {
@@ -61,6 +66,7 @@ export class MessageService {
         this.webSocket.onclose = () => console.log('connection closed');
         this.webSocket.onmessage = ev => this.handleMessage(ev);
 
+        this.sendMessage(new StartMessage('Phone:' + this.getHexId()));
         this.sendHeartbeat();
     }
 }
