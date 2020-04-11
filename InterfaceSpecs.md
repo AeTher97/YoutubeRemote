@@ -11,9 +11,10 @@
 
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY", //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE, VOLUME},
+  "action" : "PLAY", //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE, VOLUME, REPEAT},
   "timeSet" : 125, //optional(required in case of set time)
-  "volumeSet" : 60 //percentage optional(required in case of volume)
+  "volumeSet" : 60, //percentage optional(required in case of volume)
+  "repeatSet" : "REPEAT_OFF" //optional(required in case of repeat){REPEAT_ONE,REPEAT_ALL}
 }
 
 {
@@ -89,9 +90,10 @@ This one sends only queue updates e.g. if picture of the song changes or selecte
 
 {
   "messageType" : "MEDIA_CONTROL",
-  "action" : "PLAY", //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE, VOLUME},
+  "action" : "PLAY", //{PAUSE, NEXT, PREVIOUS, SET_TIME, SHUFFLE, VOLUME, REPEAT},
   "timeSet" : 125, //optional(required in case of set time)
-  "volumeSet" : 60 //percentage optional(required in case of volume)
+  "volumeSet" : 60, //percentage optional(required in case of volume)
+  "repeatSet" : "REPEAT_OFF" //optional(required in case of repeat){REPEAT_ONE,REPEAT_ALL}
 }
 
 {
