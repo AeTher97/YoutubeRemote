@@ -5,7 +5,8 @@ import ControlsTimeMessage from '../messages/server-messages/ControlsTimeMessage
 import ControlsSongMessage from '../messages/server-messages/ControlsSongMessage';
 import Subscription from '../utils/Subscription';
 import {QueueMessage, SongInQueue} from '../messages/server-messages/QueueMessage';
-import HomeMessage, {HomeInfo} from "../messages/server-messages/HomeMessage";
+import HomeMessage, {HomeInfo, HomeItemInfo} from "../messages/server-messages/HomeMessage";
+import Home from "../scenes/home/Home";
 
 class SongInfo {
     songLengthInSeconds: number;
@@ -78,7 +79,22 @@ export class StorageService {
     }
 
     private handleHomeInformation(msg: HomeMessage): void {
-        this.storage.homeInfo = msg.content;
+        // this.storage.homeInfo = msg.content;
+
+        msg.content.forEach((element) => {
+            let item: number = this.storage.homeInfo.findIndex(({index}) => index === element.index);
+            if (item !== -1) {
+                this.storage.homeInfo.splice(item, 1, element);
+            } else {
+                this.storage.homeInfo.push(element);
+            }
+
+        });
+
+        this.storage.homeInfo.sort((a: HomeInfo, b: HomeInfo) => {
+            return a.index - b.index;
+        });
+
         this.onChange();
     }
 }

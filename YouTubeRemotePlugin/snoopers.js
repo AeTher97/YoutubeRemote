@@ -42,6 +42,7 @@ function getTimeState() {
         return {time: time, changed: changed};
 
     } catch (e) {
+        console.log(e);
         console.log('no song chosen');
         return {time: null, changed: false};
     }
@@ -50,6 +51,7 @@ function getTimeState() {
 function getSongState() {
     try {
         const songState = {title: '', performer: '', imgSrc: '', imgSrcLarge: ''};
+        console.log("Getting song state");
         let foundTitle = document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div.content-info-wrapper.style-scope.ytmusic-player-bar > yt-formatted-string");
         let foundPerformer = document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div.content-info-wrapper.style-scope.ytmusic-player-bar > span > span.subtitle.style-scope.ytmusic-player-bar > yt-formatted-string:nth-child(1)");
 
@@ -58,15 +60,16 @@ function getSongState() {
         songState.performer = foundPerformer;
         songState.title = foundTitle.title;
 
-        songState.imgSrc = document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > img").getAttribute('src');
-        songState.imgSrcLarge = document.querySelector("#player-page").children[0].children[0].children[0].children[1].children[0].children[0].getAttribute('src');
+        songState.imgSrc = document.querySelector("#layout > ytmusic-player-bar > div.middle-controls.style-scope.ytmusic-player-bar > div > img").getAttribute('src');
+        songState.imgSrcLarge = document.querySelector("#player > div > yt-img-shadow >img").getAttribute('src');
+
 
         const changed = oldCurrentSong !== songState;
         oldCurrentSong = songState;
 
         return {songState: songState, changed: changed};
     } catch (e) {
-        console.log('no song chosen');
+        console.error('no song chosen ' + e.message);
         return {songState: null, changed: false};
     }
 
@@ -111,9 +114,9 @@ function getDetailsState() {
         const mutedString = "M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z";
         const notMutedString = "M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z";
 
-        const repeatAttribute = document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar").children[0].children[0].children[0].children[0].getAttribute('d');
+        const repeatAttribute = document.querySelector("#right-controls > div > tp-yt-paper-icon-button.repeat.style-scope.ytmusic-player-bar").children[0].children[0].children[0].children[0].getAttribute('d');
 
-        if (repeatAttribute === repeatOffString && document.querySelector("#right-controls > div > paper-icon-button.repeat.style-scope.ytmusic-player-bar").getAttribute('aria-label') !== "Repeat all") {
+        if (repeatAttribute === repeatOffString && document.querySelector("#right-controls > div > tp-yt-paper-icon-button.repeat.style-scope.ytmusic-player-bar").getAttribute('aria-label') !== "Repeat all") {
             detailsState.repeatType = "REPEAT_OFF"
         } else if (repeatAttribute === repeatAllString) {
             detailsState.repeatType = "REPEAT_ALL"
@@ -125,7 +128,7 @@ function getDetailsState() {
 
         detailsState.volume = parseInt(document.querySelector("#volume-slider").getAttribute('aria-valuenow'));
 
-        const muteAttribute = document.querySelector("#right-controls > div > paper-icon-button.volume.style-scope.ytmusic-player-bar").children[0].children[0].children[0].children[0].getAttribute('d');
+        const muteAttribute = document.querySelector("#right-controls > div > tp-yt-paper-icon-button.repeat.style-scope.ytmusic-player-bar").children[0].children[0].children[0].children[0].getAttribute('d');
 
         if (muteAttribute === mutedString) {
             detailsState.muted = true;
@@ -142,14 +145,14 @@ function getDetailsState() {
 
         return {changed: changed, detailsState: detailsState}
     } catch (e) {
-        console.log("Cannot find details");
+        console.error("Cannot find details " + e.message);
         return null;
     }
 
 }
 
 function getHomeState() {
-    const allBars = document.querySelector("#browse-page > ytmusic-section-list-renderer").children[1].children;
+    const allBars = document.querySelector("#contents").children;
 
 
     let content = [];
@@ -177,14 +180,20 @@ function getHomeState() {
                 };
                 if (elements[j] !== undefined) {
 
+
                     if (elements[j].children[0].children[0].getAttribute('thumbnail-crop_') === "MUSIC_THUMBNAIL_CROP_UNSPECIFIED") {
                         elementObject.type = "SQUARE"
                     } else {
                         elementObject.type = "CIRCLE";
                     }
-                    elementObject.imgSrc = elements[0].children[0].children[0].children[0].children[0].getAttribute('src');
-                    elementObject.title = elements[j].children[1].children[0].innerText;
-                    elementObject.subText = elements[j].children[1].children[1].children[1].innerText;
+                    try {
+                        elementObject.imgSrc = elements[j].children[0].children[0].children[0].children[0].getAttribute('src');
+
+                        elementObject.title = elements[j].children[1].children[0].innerText;
+                        elementObject.subText = elements[j].children[1].children[1].children[1].innerText;
+                    } catch (e) {
+                        console.log("xd")
+                    }
                     barObject.content.push(elementObject);
                 }
             }
@@ -193,6 +202,8 @@ function getHomeState() {
 
     }
 
+    home = content;
+    console.log(content)
     return content;
 }
 
@@ -201,6 +212,7 @@ function getWholeQueue() {
     const queue = document.querySelector("#queue").children[0].children;
 
 
+    console.log(queue)
     const strippedQueue = [];
     for (let i = 0; i < queue.length; i++) {
         const attribute = queue[i].getAttribute('play-button-state');

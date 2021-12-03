@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 
-import { Icon } from 'react-native-elements';
+import {Icon} from 'react-native-elements';
+import {View} from 'react-native';
 
 import messageService from '../../services/MessageService';
-import { PlaySongMessage, PauseSongMessage } from '../../messages/client-messages/MediaControlMessage';
+import {PlaySongMessage, PauseSongMessage} from '../../messages/client-messages/MediaControlMessage';
 import storageService from '../../services/StorageService';
 import Subscription from '../../utils/Subscription';
 
@@ -26,18 +27,20 @@ export default class PlayButton extends Component<{}, PlayButtonState> {
 
     public render(): JSX.Element {
         return (
-            <Icon 
-                name={this.getCurrentIconName()}
-                type='material'
-                color='#fff'
-                underlayColor='#0000'
-                onPress={() => this.togglePlaying()}
-                size={30}/>
+            <View style={{marginLeft: 'auto', marginRight: 10}}>
+                <Icon
+                    name={this.getCurrentIconName()}
+                    type='material'
+                    color='#fff'
+                    underlayColor='#0000'
+                    onPress={() => this.togglePlaying()}
+                    size={30}/>
+            </View>
         );
     }
 
     private togglePlaying(): void {
-        if(this.state.isSongPlaying)
+        if (this.state.isSongPlaying)
             messageService.sendMessage(new PauseSongMessage());
         else
             messageService.sendMessage(new PlaySongMessage());

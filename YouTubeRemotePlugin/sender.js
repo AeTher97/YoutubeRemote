@@ -18,12 +18,13 @@ function emitState(state, content) {
                 socket.send(getStateMessage(state, songs))
             }
         } else if (state === "HOME") {
-            if (content.length > 2) {
-                while (content.length > 0) {
-                    socket.send(getStateMessage(state, content.splice(0, 2)));
+            const copy = content.slice();
+            if (copy.length > 2) {
+                while (copy.length > 0) {
+                    socket.send(getStateMessage(state, copy.splice(0, 2)));
                 }
             } else {
-                socket.send(getStateMessage(state, content))
+                socket.send(getStateMessage(state, copy))
             }
         } else {
             socket.send(getStateMessage(state, content));
@@ -35,9 +36,11 @@ function emitState(state, content) {
 function emitAllStates() {
     emitState("CONTROLS_SONG", getSongState().songState);
     emitState("CONTROLS_TIME", getTimeState().time);
-    emitState("CONTROLS_DETAILS", getDetailsState().detailsState);
-    emitState("QUEUE", getWholeQueue());
-
+    if(getDetailsState()) {
+        emitState("CONTROLS_DETAILS", getDetailsState().detailsState);
+    }
+    // emitState("QUEUE", getWholeQueue());
+    emitState("HOME", home);
 }
 
 function heartBeat() {

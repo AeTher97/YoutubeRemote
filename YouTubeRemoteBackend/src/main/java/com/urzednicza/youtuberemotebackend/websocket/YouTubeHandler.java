@@ -1,6 +1,8 @@
 package com.urzednicza.youtuberemotebackend.websocket;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.corba.se.spi.activation.InitialNameServicePackage.NameAlreadyBound;
 import com.urzednicza.youtuberemotebackend.enums.MessageType;
@@ -45,7 +47,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
     }
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession webSocketSession) {
         User user = new User();
         user.setUsername("Marek");
         if (webSocketSessionManager.getRemoteSession(user) == null) {
@@ -61,55 +63,60 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
         User user = new User();
         user.setUsername("Marek");
 
-        BasicMessage basicMessage = objectMapper.readValue(message.getPayload().toString(), BasicMessage.class);
-        MessageType messageType = basicMessage.getMessageType();
+        try {
+            BasicMessage basicMessage = objectMapper.readValue(message.getPayload().toString(), BasicMessage.class);
+            MessageType messageType = basicMessage.getMessageType();
 
 
-        if (messageType == null) {
-            log.debug("Message type is null no action performed");
-            sendError(new IllegalStateException("Message type is null no action performed"), webSocketSession);
-            return;
+            if (messageType == null) {
+                log.debug("Message type is null no action performed");
+                sendError(new IllegalStateException("Message type is null no action performed"), webSocketSession);
+                return;
+            }
+
+            if (webSocketSessionManager.getRemoteSessionByMemberSession(webSocketSession) == null && messageType != MessageType.START) {
+                sendError(new IllegalStateException("This session is not initialized"), webSocketSession);
+                return;
+            }
+
+            switch (messageType) {
+                case START:
+                    handleStart(message, webSocketSession, user);
+                    break;
+                case MEDIA_CONTROL:
+                case QUEUE_CONTROL:
+                    handleMediaControl(message, user, webSocketSession);
+                    break;
+                case SET_RECEIVER:
+                    handleSetReceiver(message, user, webSocketSession);
+                    break;
+                case CONTROLS_SONG:
+                case CONTROLS_TIME:
+                case CONTROLS_DETAILS:
+                case HOME:
+                case QUEUE:
+                    handleMediaState(message, user, webSocketSession);
+                    break;
+                case STOP:
+                    handleStop(message, user, webSocketSession);
+                    break;
+            }
+
+            updateLastSeen(user, webSocketSession);
+        } catch (JsonParseException | JsonMappingException e) {
+            sendError(e, webSocketSession);
         }
-
-        if (webSocketSessionManager.getRemoteSessionByMemberSession(webSocketSession) == null && messageType != MessageType.START) {
-            sendError(new IllegalStateException("This session is not initialized"), webSocketSession);
-            return;
-        }
-
-        switch (messageType) {
-            case START:
-                handleStart(message, webSocketSession, user);
-                break;
-            case MEDIA_CONTROL:
-            case QUEUE_CONTROL:
-                handleMediaControl(message, user, webSocketSession);
-                break;
-            case SET_RECEIVER:
-                handleSetReceiver(message, user, webSocketSession);
-                break;
-            case CONTROLS_SONG:
-            case CONTROLS_TIME:
-            case CONTROLS_DETAILS:
-            case QUEUE:
-                handleMediaState(message, user, webSocketSession);
-                break;
-            case STOP:
-                handleStop(message, user, webSocketSession);
-                break;
-        }
-
-        updateLastSeen(user, webSocketSession);
     }
 
     @Override
-    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable)  {
+    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable) {
         log.error("Transport error");
         System.out.println(throwable.getMessage());
 
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus)  {
+    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) {
 
         log.debug("Closed session with: " + webSocketSession.getId());
         RemoteSession remoteSession = webSocketSessionManager.getRemoteSessionByMemberSession(webSocketSession);

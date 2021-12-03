@@ -17,12 +17,12 @@ export default class SongInfo extends Component<{}, SongInfoState> {
         title: {
             fontWeight: 'bold',
             fontSize: 15,
-            color:"#fff"
+            color:"#fff",
         },
         performerText: {
             fontWeight: 'bold',
             fontSize: 15,
-            color:"#bfbfbf"
+            color:"#bfbfbf",
         }
     });
 
@@ -41,13 +41,13 @@ export default class SongInfo extends Component<{}, SongInfoState> {
     public render(): JSX.Element {
         return (
             <TouchableWithoutFeedback onPress={this.goToQueueView}>
-                <View style={{flexDirection: 'row', width: '80%'}}>
+                <View style={{flexDirection: 'row', width: '85%', overflow: 'hidden'}}>
                     <Image source={{uri: this.state.imageSource}} style={{aspectRatio: 1, height:'100%'}}></Image>
                     <View style={{ width: 10 }}>
                     </View>
                     <View style={{justifyContent: 'space-around'}}>
-                        <Text style={this.styles.title}>{this.state.title}</Text>
-                        <Text style={this.styles.performerText}>{this.state.performer} · {this.getFormattedSongLength()}</Text>
+                        <Text style={this.styles.title} numberOfLines={1}>{this.state.title}</Text>
+                        <Text style={this.styles.performerText} numberOfLines={1}>{this.state.performer} · {this.getFormattedSongLength()}</Text>
                     </View>
                 </View>
             </TouchableWithoutFeedback>

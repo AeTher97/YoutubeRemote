@@ -5,15 +5,20 @@ import {RepeatMode} from "../client-messages/MediaControlMessage";
 export class HomeInfo {
     index: number;
     header: RepeatMode;
+    imgSrc: string;
+    subHeader: string;
     content: [
-        {
-            "title": string,
-            "imgSrc": string,
-            "subText": string,
-            "type": ElementType
-        }
+        HomeItemInfo
     ]
 }
+
+export class HomeItemInfo {
+    title: string;
+    imgSrc: string;
+    subText: string;
+    type: ElementType;
+}
+
 
 export default class HomeMessage implements IMessage {
     messageType: MessageType = MessageType.HOME;

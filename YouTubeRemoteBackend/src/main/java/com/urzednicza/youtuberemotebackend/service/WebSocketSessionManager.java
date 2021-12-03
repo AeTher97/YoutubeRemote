@@ -61,7 +61,7 @@ public class WebSocketSessionManager {
     public void garbageCollectSessions()  {
         int deletedMemberSessions = 0;
         int deletedRemoteSessions = 0;
-        log.info("Collecting garbage sessions." + new Date().toString());
+        log.info("Collecting garbage sessions." + new Date());
 
         List<User> removedRemoteSessions = new ArrayList<>();
         for (Map.Entry<User, RemoteSession> remoteSession : remoteSessions.entrySet()) {

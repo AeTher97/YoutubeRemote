@@ -27,9 +27,10 @@ export default class SelectedSongBar extends Component<{}, SelectedSongBarState>
 
     public render(): JSX.Element {
         return (
-        <View style={{ height: '10%', backgroundColor: 'transparent' }}>
+
+        this.state.isSongSelected ? <View style={{ height: 50, backgroundColor: 'transparent' }}>
             {this.getElementIfSongIsSelected()}
-        </View>
+        </View> : <></>
         );
     }
 
@@ -50,7 +51,7 @@ export default class SelectedSongBar extends Component<{}, SelectedSongBarState>
             return;
         return (
             <>
-                <View style={{ height: '98%', flexDirection: 'row', alignItems: "center", backgroundColor: "#1d1d1d"}}>
+                <View style={{ height: '98%', flexDirection: 'row', alignItems: "center", justifyContent: 'flex-start', backgroundColor: "#1d1d1d"}}>
                     <SongInfo/>
                     <PlayButton/>
                 </View>

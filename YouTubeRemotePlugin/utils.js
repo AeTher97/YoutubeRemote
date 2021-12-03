@@ -11,8 +11,27 @@ function scrollToBottom() {
         const innerWrapperHeight = document.querySelector("#browse-page > ytmusic-section-list-renderer").children[1];
         window.scrollTo(0, oldSize + 4000);
         if (oldSize === innerWrapperHeight.getBoundingClientRect().height) {
-            window.scrollTo(0, 0);
             clearInterval(scrollInterval);
+
+            const buttons = document.querySelectorAll("#next-items-button");
+
+            let counter=0;
+
+            const interval = setInterval(()=> {
+                for (const button of buttons) {
+                    button.click();
+                }
+                counter++;
+                if(counter===4){
+                    window.scrollTo(0, 0);
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        emitState("HOME", getHomeState())
+                    }, 200)
+                }
+            },200);
+
+
         } else {
             oldSize = innerWrapperHeight.getBoundingClientRect().height;
         }

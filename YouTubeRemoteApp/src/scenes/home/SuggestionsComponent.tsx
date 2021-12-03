@@ -1,37 +1,70 @@
-import React, {Component} from 'react';
-import {Text, View} from 'react-native';
+import React, {Component} from "react";
+import {ScrollView, View} from "react-native";
+import storageService, {Storage} from "../../services/StorageService";
+import Subscription from "../../utils/Subscription";
+import {HomeInfo} from "../../messages/server-messages/HomeMessage";
+import ListElement from "./ListElement";
+import SongListComponent from "./SongListComponent";
+import SongInfo from "./SongInfo";
 
-interface SuggestionsProps {
-    pomidorNumber: number;
+
+interface ListElementState {
+    homeInfo: HomeInfo[]
 }
 
-interface PomidorState {
-    testNumber: number;
-}
 
-export default class TestComponent extends Component<SuggestionsProps, PomidorState> {
+export default class SuggestionsComponent extends Component<{}, ListElementState> {
+    private storageSubscription: Subscription;
 
-    public constructor(props: SuggestionsProps) {
+    public constructor(props: {}) {
         super(props);
-        this.init();
+        this.state = this.createStateFromStorage(storageService.storage);
+        console.log(this.state);
+        this.storageSubscription = storageService.subscribe(storage => this.onStorageChange(storage));
+    }
+
+    public componentWillUnmount(): void {
+        this.storageSubscription.unsubscribe();
     }
 
     public render(): JSX.Element {
-        return (
-            <View style={{
-                height: '100%',
-                width: '100%',
-                justifyContent: "center",
-                alignItems: "center",
-                position: 'absolute',
-                backgroundColor: "#000"
-            }}>
-                <Text style={{color: "#fff"}}>TestComponent text. Pomidor: {this.props.pomidorNumber}</Text>
-            </View>
-        );
+
+        if (this.state.homeInfo.length === 0) {
+            return <View style={{backgroundColor: '#000', flex: 1}}/>;
+        } else {
+            return (
+                <View style={{
+                    width: '100%',
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    backgroundColor: "#000",
+                    flex: 1,
+                    overflow: 'hidden'
+                }}>
+                    <ScrollView
+                        scrollEventThrottle={200}
+                        decelerationRate="fast"
+                    >
+                    {this.state.homeInfo.map((item,index) =>
+                        <SongListComponent content={item.content} header={item.header}  key={index} />
+                        )}
+                    </ScrollView>
+
+                </View>
+            );
+        }
     }
 
-    private init(): void {
-        this.state = {testNumber: 0};
+    private onStorageChange(storage: Storage): void {
+        this.setState(this.createStateFromStorage(storageService.storage));
     }
+
+    private createStateFromStorage(storage: Storage): ListElementState {
+        console.log(storage.homeInfo)
+        return {
+            homeInfo: storage.homeInfo
+        };
+
+    }
+
 }

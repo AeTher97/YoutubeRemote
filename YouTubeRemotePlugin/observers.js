@@ -49,8 +49,8 @@ function addDetailsObserver(callback, threshold) {
 }
 
 function addHomeObserver(callback, threshold) {
-    const home = document.querySelector("#browse-page > ytmusic-section-list-renderer").children[1];
-    createObserver(home, config, homeLastFired, homeFired, threshold, callback);
+    const homeObject = document.querySelector("#browse-page > ytmusic-section-list-renderer").children[1];
+    createObserver(homeObject, config, homeLastFired, homeFired, threshold, callback);
 }
 
 function initializeObservers(threshold = 750) {

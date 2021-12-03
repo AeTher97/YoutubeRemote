@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Log4j
 public class RemoteSession {
 
-    private Map<String, MemberSession> memberSessions;
+    private final Map<String, MemberSession> memberSessions;
     private MemberSession mediaPlayer;
     private final User user;
     private final ObjectMapper objectMapper;
@@ -53,6 +53,7 @@ public class RemoteSession {
     public void removeMemberSession(String deviceName) {
         if (memberSessions.get(deviceName) == null) {
             log.error("This session doesn't exist");
+            return;
         }
         if (memberSessions.get(deviceName).equals(mediaPlayer)) {
             mediaPlayer = null;
