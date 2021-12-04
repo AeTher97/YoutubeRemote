@@ -9,7 +9,7 @@
     android:paddingBottom="20dp"
     app:behavior_hideable="false"
     app:behavior_peekHeight="56dp"
-    app:layout_behavior="com.example.youtuberemoteandroid.CustomBottomSheetBehaviour">
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <View
         android:id="@+id/view"

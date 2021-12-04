@@ -50,11 +50,12 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
 
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
-        CustomBottomSheetBehaviour bottomSheetBehavior = getBottomSheetBehavior(dependency);
+        BottomSheetBehavior bottomSheetBehavior = getBottomSheetBehavior(dependency);
         if (bottomSheetBehavior != null) {
             if (!animating && !holding && !closed) {
-                Log.i("This", "Fucker");
-
+                if (childHeight == 1) {
+                    childHeight = child.getHeight();
+                }
                 float slideOffset = getSlideOffset(parent, dependency, bottomSheetBehavior);
                 View filler = parent.findViewById(R.id.filler);
                 if (fillerPosition == 0) {
@@ -86,15 +87,15 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
 
     @Override
     public boolean onTouchEvent(@NonNull CoordinatorLayout parent, @NonNull V child, @NonNull MotionEvent ev) {
-        CustomBottomSheetBehaviour bottomSheetBehavior = CustomBottomSheetBehaviour.from(parent.findViewById(R.id.bottomSheet));
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(parent.findViewById(R.id.bottomSheet));
         CustomCoordinatorLayout customCoordinatorLayout = (CustomCoordinatorLayout) parent;
         bottomSheetBehavior.setPeekHeight(bottomSheetBehavior.getPeekHeight());
 
-        if(!holding && !parent.isPointInChildBounds(child, (int) ev.getX(), (int) ev.getY())){
+        if (!holding && !parent.isPointInChildBounds(child, (int) ev.getX(), (int) ev.getY())) {
             return false;
         }
 
-        if (bottomSheetBehavior.state == CustomBottomSheetBehaviour.STATE_EXPANDED || animating) {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED || animating) {
             return false;
         }
 
@@ -125,25 +126,27 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
             parent.setY(position);
 
             ViewGroup.LayoutParams layoutParams = child.getLayoutParams();
-            if (position > peekHeight) {
-                float bottomBarFraction = position/ (float) endPosition;
-                Log.i("freac", String.valueOf((position - peekHeight) - bottomBarFraction * customCoordinatorLayout.getBottomBarHeight()));
-
-                int height = (int) (childHeight - (position - peekHeight) - bottomBarFraction * customCoordinatorLayout.getBottomBarHeight());
-                layoutParams.height = height;
-                setChildHeight(child, height);
+            float bottomBarFraction = position / (float) endPosition;
+            int drawerPeek = peekHeight - motion;
+            if (drawerPeek > peekHeight) {
+                drawerPeek = peekHeight;
             }
+            int menuPeek = (int) (bottomBarFraction * customCoordinatorLayout.getBottomBarHeight());
+            int height = (int) (parentHeight - (Math.max(drawerPeek, menuPeek)) - (position));
+            layoutParams.height = height;
+            setChildHeight(child, height);
             child.setLayoutParams(layoutParams);
+
 
             customCoordinatorLayout.setBottomBarVisible((motionStart + ev.getRawY() - yStart) / (float) endPosition);
             return true;
         } else if (ev.getAction() == MotionEvent.ACTION_CANCEL) {
             holding = false;
-            if (parent.getY() > parentHeight / 2f) {
+            if (parent.getY() > parentHeight / 3f) {
                 closed = true;
                 animatePosition((int) parent.getY(), endPosition, bottomSheetBehavior, customCoordinatorLayout, child);
             } else {
-                closed=false;
+                closed = false;
                 animatePosition((int) parent.getY(), 0, bottomSheetBehavior, customCoordinatorLayout, child);
             }
             return true;
@@ -153,7 +156,7 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
 
     }
 
-    private void animatePosition(int start, int end, CustomBottomSheetBehaviour bottomSheetBehavior, CustomCoordinatorLayout parent, View child) {
+    private void animatePosition(int start, int end, BottomSheetBehavior bottomSheetBehavior, CustomCoordinatorLayout parent, View child) {
         int span = Math.abs(end - start);
 
         animating = true;
@@ -167,18 +170,17 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
             }
 
             ViewGroup.LayoutParams layoutParams = child.getLayoutParams();
-            if ((int) animation.getAnimatedValue() > peekHeight) {
-                int height = (int) (childHeight - (currentValue - peekHeight) - (float) (int) animation.getAnimatedValue() / endPosition * parent.getBottomBarHeight());
-                layoutParams.height = height;
-                setChildHeight(child, height);
+            float bottomBarFraction = currentValue / (float) endPosition;
+            int drawerPeek = peekHeight - currentValue;
+            if (drawerPeek > peekHeight) {
+                drawerPeek = peekHeight;
             }
+            int menuPeek = (int) (bottomBarFraction * parent.getBottomBarHeight());
+            int height = (int) (parentHeight - (Math.max(drawerPeek, menuPeek)) - (currentValue));
+            layoutParams.height = height;
+            setChildHeight(child, height);
             child.setLayoutParams(layoutParams);
 
-
-            if (peekHeightCached) {
-                bottomSheetBehavior.setPeekHeight(peekHeight - (int) animation.getAnimatedValue());
-
-            }
             if ((int) animation.getAnimatedValue() == end) {
                 animating = false;
             }
@@ -192,13 +194,12 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
         }
         float fraction = height / (float) childHeight;
         ImageView imageView = child.findViewById(R.id.song_image);
-//        imageView.setX(-fraction * child.getWidth() / 2 + 30);
         imageView.setScaleX(fraction);
         imageView.setScaleY(fraction);
     }
 
 
-    private float getSlideOffset(CoordinatorLayout parent, View dependency, CustomBottomSheetBehaviour bottomSheetBehavior) {
+    private float getSlideOffset(CoordinatorLayout parent, View dependency, BottomSheetBehavior bottomSheetBehavior) {
         int parentHeight = parent.getMeasuredHeight();
         float sheetY = dependency.getY();
         int peekHeight = bottomSheetBehavior.getPeekHeight();
@@ -210,23 +211,19 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
         return (parentHeight - peekHeight - sheetY) / deltaY;
     }
 
-    private float getAbsoluteOffset(CoordinatorLayout parent, View dependency, CustomBottomSheetBehaviour bottomSheetBehavior) {
+    private float getAbsoluteOffset(CoordinatorLayout parent, View dependency, BottomSheetBehavior bottomSheetBehavior) {
         int parentHeight = parent.getMeasuredHeight();
         float sheetY = dependency.getY();
         int peekHeight = bottomSheetBehavior.getPeekHeight();
-        int sheetHeight = dependency.getHeight();
-        float collapseY = parentHeight - peekHeight;
-        float expandY = parentHeight - sheetHeight;
-
         return parentHeight - peekHeight - sheetY;
     }
 
     @Nullable
-    private CustomBottomSheetBehaviour getBottomSheetBehavior(@NonNull View view) {
+    private BottomSheetBehavior getBottomSheetBehavior(@NonNull View view) {
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) view.getLayoutParams();
         CoordinatorLayout.Behavior behavior = params.getBehavior();
-        if (behavior instanceof CustomBottomSheetBehaviour) {
-            return (CustomBottomSheetBehaviour) behavior;
+        if (behavior instanceof BottomSheetBehavior) {
+            return (BottomSheetBehavior) behavior;
         }
         return null;
     }
