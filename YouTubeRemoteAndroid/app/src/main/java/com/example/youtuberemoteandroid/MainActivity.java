@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
                     BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
                     bottomSheetBehavior.setPeekHeight((int) (parent.getHeight()*0.1f));
                     songControls.getLayoutParams().height = (int) (parent.getHeight()*0.9f);
+                    bottomSheet.getLayoutParams().height = (int) (parent.getHeight()*0.9f);
                     container.requestLayout();
 
                 }

@@ -64,10 +64,6 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
 
                 filler.setY(fillerPosition - getAbsoluteOffset(parent, dependency, bottomSheetBehavior));
 
-                if (childStartY == UNDEFINED) {
-                    childStartY = child.getLayoutParams().height;
-                }
-
 
                 ViewGroup.LayoutParams layoutParams = child.getLayoutParams();
                 layoutParams.height = (int) (parent.getHeight() * 0.1f + (parent.getHeight() * 0.8f * (1 - slideOffset)));
@@ -140,9 +136,9 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
 
             customCoordinatorLayout.setBottomBarVisible((motionStart + ev.getRawY() - yStart) / (float) endPosition);
             return true;
-        } else if (ev.getAction() == MotionEvent.ACTION_CANCEL) {
+        } else if (ev.getAction() == MotionEvent.ACTION_CANCEL && holding) {
             holding = false;
-            if (parent.getY() > parentHeight / 3f) {
+            if ((!closed && parent.getY() > parentHeight / 3f) ||(!closed && parent.getY() > parentHeight*2f / 3f) ) {
                 closed = true;
                 animatePosition((int) parent.getY(), endPosition, bottomSheetBehavior, customCoordinatorLayout, child);
             } else {
@@ -193,9 +189,11 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
             return;
         }
         float fraction = height / (float) childHeight;
+        float imageFraction =fraction +0.15f;
         ImageView imageView = child.findViewById(R.id.song_image);
-        imageView.setScaleX(fraction);
-        imageView.setScaleY(fraction);
+        imageView.setScaleX(imageFraction);
+        imageView.setScaleY(imageFraction);
+        imageView.setX(child.getWidth()/2f * fraction - imageView.getWidth()/2f + (child.getWidth()/20f*(1-fraction)));
     }
 
 

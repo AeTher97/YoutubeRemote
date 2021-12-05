@@ -14,8 +14,15 @@
         android:id="@+id/container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:background="@drawable/test_drawable"
+        android:background="#bbbbbb"
         app:layout_constraintTop_toTopOf="parent">
+
+        <View
+            android:layout_gravity="bottom"
+            android:id="@+id/filler"
+            android:background="#bbbbbb"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             app:layout_behavior="com.example.youtuberemoteandroid.HidingViewWithBottomSheetBehavior"
@@ -37,10 +44,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <View
-            android:id="@+id/filler"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"/>
+
 
         <include layout="@layout/song_bottom_sheet" />
     </com.example.youtuberemoteandroid.CustomCoordinatorLayout>
