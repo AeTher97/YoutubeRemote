@@ -1,20 +1,25 @@
 function executeQueueControlCommand(message) {
     switch (message.action) {
         case 'MOVE':
-            move(message.currentIndex,message.targetIndex);
+            move(message.currentIndex, message.targetIndex);
             break;
         case 'REMOVE' :
             remove(message.targetIndex);
             break;
         case 'PLAY_NEXT' :
             playNext(message.targetIndex);
+            break;
+        case 'PLAY':
+            playFromQueue(message.targetIndex);
+            break;
 
     }
 }
 
-function move(currentIndex,targetIndex) {
+function move(currentIndex, targetIndex) {
+    console.log(currentIndex,targetIndex)
     const elementDrag = getQueue()[currentIndex];
-    const elementDrop = document.querySelector("#queue");
+    const elementDrop = document.querySelector("#player-page > div > div.side-panel.modular.style-scope.ytmusic-player-page > ytmusic-tab-renderer>div>ytmusic-player-queue ");
     const elementDropCoords = getQueue()[targetIndex];
     if (!elementDrag || !elementDrop) return false;
 
@@ -57,8 +62,24 @@ function playNext(targetIndex) {
     exposeElementMenu(targetIndex, clickPlayNextOnPopup);
 }
 
+const playFromQueue = (targetIndex) => {
+
+    getQueue()[targetIndex].children[1].children[1].children[1].children[0].click();
+}
+
+
 function clickRemoveOnPopup() {
-    getPopUp()[5].click();
+    for (let i = 0; i < getPopUp().length; i++) {
+        try {
+            if (getPopUp()[i].children[0].children[0].children[0].children[0].getAttribute("d") === "M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z") {
+                console.log(i);
+                getPopUp()[i].click();
+            }
+        } catch (e) {
+
+        }
+    }
+
 }
 
 function clickPlayNextOnPopup() {
@@ -67,13 +88,14 @@ function clickPlayNextOnPopup() {
 
 function exposeElementMenu(targetIndex, callback) {
     getQueue()[targetIndex].children[3].children[1].click()
+    getQueue()[targetIndex].children[3].children[1].click()
     setTimeout(() => {
         callback()
     }, 300);
 }
 
 function getQueue() {
-    return document.querySelector("#queue").children[0].children;
+    return document.querySelector("#player-page > div > div.side-panel.modular.style-scope.ytmusic-player-page > ytmusic-tab-renderer>div>ytmusic-player-queue > div").children;
 }
 
 function getPopUp() {

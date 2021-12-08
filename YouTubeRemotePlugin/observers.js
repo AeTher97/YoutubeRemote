@@ -28,7 +28,7 @@ function createObserver(object, config, lastFired, hasFired, threshold, callback
 }
 
 function addQueueObserver(callback, threshold) {
-    const queue = document.querySelector("#queue").children[0];
+    const queue = document.querySelector("#player-page > div > div.side-panel.modular.style-scope.ytmusic-player-page > ytmusic-tab-renderer>div>ytmusic-player-queue > div");
     createObserver(queue, config, queueLastFired, queueFired, threshold, callback);
 
 }
@@ -58,7 +58,6 @@ function initializeObservers(threshold = 750) {
         setTimeout(() => {
             const queueStateWrapper = getQueueState();
             if (queueStateWrapper.changed) {
-                console.log(queueStateWrapper.queueState.songs);
                 emitState("QUEUE", queueStateWrapper.queueState);
             }
         }, 1000)
@@ -67,9 +66,6 @@ function initializeObservers(threshold = 750) {
     addSongObserver(() => {
         console.log('title event');
         const songStateWrapper = getSongState();
-        if (songStateWrapper === null) {
-            return;
-        }
         if (songStateWrapper.changed) {
             emitState("CONTROLS_SONG", songStateWrapper.songState)
         }
@@ -101,19 +97,19 @@ function initializeObservers(threshold = 750) {
         }, 1000);
     }, threshold);
 
-    const interval = setInterval(() => {
-        if(document.querySelector("#browse-page > ytmusic-section-list-renderer") !== null){
-            clearInterval(interval);
-            console.log("intrea");
-            emitState("HOME", getHomeState());
-            addHomeObserver(() => {
-                console.log('Home event');
-                setTimeout(() => {
-                    emitState('HOME',getHomeState())
-                },500)
-            },threshold)
-        }
-    },100)
+    // const interval = setInterval(() => {
+    //     if(document.querySelector("#browse-page > ytmusic-section-list-renderer") !== null){
+    //         clearInterval(interval);
+    //         console.log("intrea");
+    //         emitState("HOME", getHomeState());
+    //         addHomeObserver(() => {
+    //             console.log('Home event');
+    //             setTimeout(() => {
+    //                 emitState('HOME',getHomeState())
+    //             },500)
+    //         },threshold)
+    //     }
+    // },100)
 
 }
 

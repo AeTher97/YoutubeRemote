@@ -1,31 +1,4 @@
-function executeControlCommand(message) {
-    switch (message.action) {
-        case 'PLAY':
-            play();
-            break;
-        case  'PAUSE':
-            pause();
-            break;
-        case 'NEXT':
-            next();
-            break;
-        case 'PREVIOUS' :
-            previous();
-            break;
-        case 'SET_TIME' :
-            setTime(message.timeSet);
-            break;
-        case 'VOLUME' :
-            setVolume(message.volumeSet);
-            break;
-        case 'SHUFFLE' :
-            shuffle();
-            break;
-        case 'REPEAT' :
-            setRepeat(message.repeatSet);
 
-    }
-}
 
 function play() {
     if (oldCurrentTime.playing === false) {
@@ -33,18 +6,18 @@ function play() {
     }
 }
 
-function pause() {
+const pause = ()  => {
     if (oldCurrentTime.playing === true) {
         document.querySelector("#play-pause-button").click();
     }
 }
 
 function next() {
-    document.querySelector("#left-controls > div > paper-icon-button.next-button.style-scope.ytmusic-player-bar").click();
+    document.querySelector("#left-controls > div > tp-yt-paper-icon-button.next-button.style-scope.ytmusic-player-bar").click();
 }
 
 function previous() {
-    document.querySelector("#left-controls > div > paper-icon-button.previous-button.style-scope.ytmusic-player-bar").click();
+    document.querySelector("#left-controls > div > tp-yt-paper-icon-button.previous-button.style-scope.ytmusic-player-bar").click();
 }
 
 function setTime(timeSet) {
@@ -147,4 +120,33 @@ function exposeDetailControls() {
 
 function fireQueueEvent() {
 
+}
+
+const executeControlCommand = (message) => {
+    switch (message.action) {
+        case 'PLAY':
+            play();
+            break;
+        case  'PAUSE':
+            pause();
+            break;
+        case 'NEXT':
+            next();
+            break;
+        case 'PREVIOUS' :
+            previous();
+            break;
+        case 'SET_TIME' :
+            setTime(message.timeSet);
+            break;
+        case 'VOLUME' :
+            setVolume(message.volumeSet);
+            break;
+        case 'SHUFFLE' :
+            shuffle();
+            break;
+        case 'REPEAT' :
+            setRepeat(message.repeatSet);
+
+    }
 }

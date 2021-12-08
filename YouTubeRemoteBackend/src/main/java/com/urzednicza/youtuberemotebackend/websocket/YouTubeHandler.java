@@ -95,6 +95,7 @@ public class YouTubeHandler implements WebSocketHandler, SubProtocolCapable {
                 case CONTROLS_DETAILS:
                 case HOME:
                 case QUEUE:
+                case QUEUE_LENGTH:
                     handleMediaState(message, user, webSocketSession);
                     break;
                 case STOP:

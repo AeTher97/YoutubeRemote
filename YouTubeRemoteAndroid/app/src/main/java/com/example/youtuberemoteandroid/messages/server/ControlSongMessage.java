@@ -1,6 +1,6 @@
-package com.example.youtuberemoteandroid.messages;
+package com.example.youtuberemoteandroid.messages.server;
 
-import com.example.youtuberemoteandroid.MessageType;
+import com.example.youtuberemoteandroid.enums.MessageType;
 
 import lombok.Data;
 

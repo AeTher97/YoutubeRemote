@@ -1,5 +1,9 @@
 let oldSize;
+const body = document.querySelector("body");
 
+const ID =  ()=> {
+    return '_' + Math.random().toString(36).substr(2, 9);
+};
 
 function scrollToBottom() {
     let wrapperHeight = document.querySelector("#browse-page > ytmusic-section-list-renderer").children[1];
