@@ -1,3 +1,4 @@
+// const address = 'ws://localhost:8079/remote';
 const address = 'wss://globalcapsleague.com/remote';
 const deviceName =`${navigator.platform}` + ID()  ;
 const initializeScripts = () => {

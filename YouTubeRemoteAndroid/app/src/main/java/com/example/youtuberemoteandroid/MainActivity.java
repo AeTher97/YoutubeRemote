@@ -3,6 +3,9 @@ package com.example.youtuberemoteandroid;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentOnAttachListener;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,18 +24,25 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.youtuberemoteandroid.adapters.QueueAdapter;
 import com.example.youtuberemoteandroid.enums.Action;
+import com.example.youtuberemoteandroid.fragments.MainActivityFragment;
+import com.example.youtuberemoteandroid.fragments.MainFragment;
+import com.example.youtuberemoteandroid.fragments.SearchFragment;
 import com.example.youtuberemoteandroid.messages.client.ClientMessage;
 import com.example.youtuberemoteandroid.messages.server.ConstrolsDetailsMessage;
 import com.example.youtuberemoteandroid.messages.server.ControlSongMessage;
 import com.example.youtuberemoteandroid.messages.server.ControlTimeMessage;
 import com.example.youtuberemoteandroid.messages.server.QueueMessage;
+import com.example.youtuberemoteandroid.messages.server.ReceiversMessage;
+import com.example.youtuberemoteandroid.messages.server.SearchResultMessage;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.net.URI;
@@ -43,6 +53,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 
@@ -57,10 +68,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean secondLayout;
     private RecyclerView queueRecycler;
     private QueueAdapter queueAdapter;
-    private boolean songPlaying = false;
-    private final Timer reconnectTimer = new Timer();
+    private Timer reconnectTimer = new Timer();
+    private boolean connected;
+
+    private Fragment fragment;
 
     private float songControlsFraction = 0.92f;
+    @Getter
     private MediaWebSocketClient mediaWebSocketClient;
 
     @Getter
@@ -69,10 +83,11 @@ public class MainActivity extends AppCompatActivity {
     private int currentForegroundColor;
 
 
-    public void connectWithReconnection() {
+    public void connectWithReconnection(boolean delay) {
         try {
-            mediaWebSocketClient = new MediaWebSocketClient(new URI("wss://globalcapsleague.com/remote"), this);
-            reconnectTimer.schedule(new ConnectTask(), 0);
+            mediaWebSocketClient = new MediaWebSocketClient(new URI(getResources().getString(R.string.server_address)), this);
+            reconnectTimer = new Timer();
+            reconnectTimer.schedule(new ConnectTask(this), delay ? 5000 : 0);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -80,21 +95,41 @@ public class MainActivity extends AppCompatActivity {
 
     private class ConnectTask extends TimerTask {
 
+        private final MainActivity mainActivity;
+
+        public ConnectTask(MainActivity mainActivity) {
+            this.mainActivity = mainActivity;
+        }
+
         @Override
         public void run() {
-            boolean connected;
             try {
-                connected = mediaWebSocketClient.connectBlocking();
-            } catch (InterruptedException e) {
+                mediaWebSocketClient = new MediaWebSocketClient(new URI(getResources().getString(R.string.server_address)), mainActivity);
+                mediaWebSocketClient.connect();
+            } catch (URISyntaxException e) {
                 e.printStackTrace();
-                connected = false;
-            }
-
-            if (!connected) {
-                reconnectTimer.schedule(new ConnectTask(), 0);
             }
 
         }
+    }
+
+
+    public void onDisconnected() {
+        connected = false;
+        this.runOnUiThread(() -> {
+            container.closeSongControlsInstantly();
+            container.setVisibility(View.GONE);
+        });
+    }
+
+    public void onConnected() {
+        this.runOnUiThread(() -> {
+            if (!connected) {
+                container.setVisibility(View.VISIBLE);
+                container.closeSongControlsInstantly();
+                connected = true;
+            }
+        });
     }
 
 
@@ -110,6 +145,15 @@ public class MainActivity extends AppCompatActivity {
         songControls = findViewById(R.id.song_controls);
         queueRecycler = findViewById(R.id.queue_recycler);
 
+
+        getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).add(R.id.fragment_container, MainFragment.class, null)
+                .commit();
+
+        getSupportFragmentManager().addFragmentOnAttachListener((fragmentManager, newFragment) -> {
+            fragment = newFragment;
+            ((MainActivityFragment) fragment).setMainActivity(this);
+
+        });
 
         parent.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -137,9 +181,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        connectWithReconnection();
+        connectWithReconnection(false);
 
         findViewById(R.id.song_play).setOnClickListener(l -> {
+            if (mediaWebSocketClient.getCurrentTimeState() == null) {
+                return;
+            }
             if (mediaWebSocketClient.getCurrentTimeState().getContent().isPlaying()) {
                 mediaWebSocketClient.send(ClientMessage.mediaControlMessage(Action.PAUSE));
             } else {
@@ -148,6 +195,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.song_closed_play).setOnClickListener(l -> {
+            if (mediaWebSocketClient.getCurrentTimeState() == null) {
+                return;
+            }
             if (mediaWebSocketClient.getCurrentTimeState().getContent().isPlaying()) {
                 mediaWebSocketClient.send(ClientMessage.mediaControlMessage(Action.PAUSE));
             } else {
@@ -197,7 +247,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         queueRecycler.setLayoutManager(new LinearLayoutManager(this));
-
         queueAdapter = new QueueAdapter(new ArrayList<>(), this, mediaWebSocketClient);
         queueRecycler.setAdapter(queueAdapter);
 
@@ -215,7 +264,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 if (currentIndex == -1) {
-                    Log.i("update", "xd");
                     currentIndex = viewHolder.getAdapterPosition();
                 }
                 Collections.swap(((QueueAdapter) recyclerView.getAdapter()).getSongs(), viewHolder.getAdapterPosition(), target.getAdapterPosition());
@@ -257,6 +305,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    public void setReceivers(List<ReceiversMessage.Receiver> receivers) {
+        if (fragment instanceof MainFragment) {
+            this.runOnUiThread(() -> {
+                ((MainFragment) fragment).setReceivers(receivers);
+            });
+        }
+    }
+
+    public void updateSearchResults(List<SearchResultMessage.Section> searchResults) {
+        if(fragment instanceof SearchFragment){
+            ((SearchFragment) fragment).updateSearchResults(searchResults);
+        }
+    }
 
     public void setQueue(List<QueueMessage.QueueSong> newSongs) {
         List<QueueMessage.QueueSong> oldSongs = queueAdapter.getSongs();
@@ -364,11 +426,7 @@ public class MainActivity extends AppCompatActivity {
         songCompactPerformer.setEllipsize(TextUtils.TruncateAt.END);
         songCompactPerformer.setText(info.getPerformer());
 
-        if (!songPlaying) {
-            container.setVisibility(View.VISIBLE);
-            container.closeSongControlsInstantly();
-            songPlaying = true;
-        }
+
     }
 
     public void setTimeInfo(ControlTimeMessage.ControlContent info) {

@@ -72,7 +72,6 @@ function initializeObservers(threshold = 750) {
     }, threshold);
 
     addTimeObserver(() => {
-        console.log('time event');
         setTimeout(() => {
             const timeStateWrapper = getTimeState();
             if (timeStateWrapper === null) {

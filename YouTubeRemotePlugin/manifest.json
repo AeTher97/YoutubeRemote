@@ -7,7 +7,7 @@
       "matches": [
         "https://music.youtube.com/*"
       ],
-      "js": ["utils.js","queue_controller.js","media_controller.js","snoopers.js","handlers.js","observers.js","socket.js","sender.js","content.js","interface.js"],
+      "js": ["utils.js","queue_controller.js","media_controller.js","snoopers.js","handlers.js","observers.js","search.js","socket.js","sender.js","content.js","interface.js"],
       "css" : ["ytremote-styles.css"]
     }
   ]

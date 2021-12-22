@@ -195,7 +195,7 @@ function getWholeQueue() {
     for (let i = 0; i < queue.length; i++) {
         const attribute = queue[i].getAttribute('play-button-state');
         let imgSrc = queue[i].children[1].children[0].children[0].getAttribute('src').startsWith('data') ? null : queue[i].children[1].children[0].children[0].getAttribute('src');
-        const performer = queue[i].children[2].children[1].children[1].innerText;
+        const performer = queue[i].children[2].children[1].children[1].innerText || queue[i].children[2].children[1].children[1].textContent;
         if (attribute !== 'playing'
             && attribute !== 'loading'
             && attribute !== 'paused') {

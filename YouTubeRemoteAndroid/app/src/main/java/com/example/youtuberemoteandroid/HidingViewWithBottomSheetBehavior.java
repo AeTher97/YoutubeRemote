@@ -184,6 +184,9 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
         parent.setY(parent.getEndPosition());
         parent.setBottomBarVisible(1f);
 
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(parent.findViewById(R.id.bottomSheet));
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
         ViewGroup.LayoutParams layoutParams = child.getLayoutParams();
 
         int menuPeek = (int) (parent.getBottomBarHeight());
@@ -249,9 +252,11 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
         if(fraction<0.9f){
             child.findViewById(R.id.song_closed_next).setClickable(false);
             child.findViewById(R.id.song_closed_play).setClickable(false);
+            child.findViewById(R.id.song_additional_close).setClickable(true);
         } else {
             child.findViewById(R.id.song_closed_next).setClickable(true);
             child.findViewById(R.id.song_closed_play).setClickable(true);
+            child.findViewById(R.id.song_additional_close).setClickable(false);
         }
         View barBackground= child.findViewById(R.id.song_closed_bar_background);
         View barFill= child.findViewById(R.id.song_closed_bar_fill);
@@ -270,6 +275,7 @@ public class HidingViewWithBottomSheetBehavior<V extends View> extends Coordinat
             int intermediateColor=(int)new ArgbEvaluator().evaluate(fraction,parent.getMainActivity().getCurrentBackgroundColor(), Color.parseColor("#1B1B1B"));
             int intermediateBar=(int)new ArgbEvaluator().evaluate(fraction,parent.getMainActivity().getCurrentBackgroundColor(), Color.BLACK);
             child.setBackgroundColor(intermediateColor);
+            parent.findViewById(R.id.filler).setBackgroundColor(intermediateColor);
             parent.getMainActivity().getWindow().setStatusBarColor(intermediateBar);
         }
 

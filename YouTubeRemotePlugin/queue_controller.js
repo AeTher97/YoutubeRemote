@@ -17,7 +17,7 @@ function executeQueueControlCommand(message) {
 }
 
 function move(currentIndex, targetIndex) {
-    console.log(currentIndex,targetIndex)
+    console.log(currentIndex, targetIndex)
     const elementDrag = getQueue()[currentIndex];
     const elementDrop = document.querySelector("#player-page > div > div.side-panel.modular.style-scope.ytmusic-player-page > ytmusic-tab-renderer>div>ytmusic-player-queue ");
     const elementDropCoords = getQueue()[targetIndex];
@@ -28,28 +28,48 @@ function move(currentIndex, targetIndex) {
     const center1X = Math.floor((pos.left + pos.right) / 2);
     const center1Y = Math.floor((pos.top + pos.bottom) / 2);
     pos = elementDropCoords.getBoundingClientRect();
-    const center2X = Math.floor((pos.left + pos.right) / 2);
-    const center2Y = Math.floor((pos.top + pos.bottom) / 2);
+    const center2Y = Math.floor((pos.top + pos.bottom) / 2) - 10;
 
-    fireMouseEvent('mousemove', elementDrag, center1X, center1Y);
-    fireMouseEvent('mouseenter', elementDrag, center1X, center1Y);
-    fireMouseEvent('mouseover', elementDrag, center1X, center1Y);
-    fireMouseEvent('mousedown', elementDrag, center1X, center1Y);
+    elementDrag.scrollIntoView({block: 'center',inline: 'center'});
 
-    fireMouseEvent('dragstart', elementDrag, center1X, center1Y);
-    fireMouseEvent('drag', elementDrag, center1X, center1Y);
-    fireMouseEvent('mousemove', elementDrag, center1X, center1Y);
-    fireMouseEvent('drag', elementDrag, center2X, center2Y);
-    fireMouseEvent('mousemove', elementDrop, center2X, center2Y);
+    setTimeout( () =>{
+        fireMouseEvent('mousemove', elementDrag, center1X, center1Y);
+        fireMouseEvent('mouseenter', elementDrag, center1X, center1Y);
+        fireMouseEvent('mouseover', elementDrag, center1X, center1Y);
+        fireMouseEvent('mousedown', elementDrag, center1X, center1Y);
 
-    fireMouseEvent('mouseenter', elementDrop, center2X, center2Y);
-    fireMouseEvent('dragenter', elementDrop, center2X, center2Y);
-    fireMouseEvent('mouseover', elementDrop, center2X, center2Y);
-    fireMouseEvent('dragover', elementDrop, center2X, center2Y);
+        fireMouseEvent('dragstart', elementDrag, center1X, center1Y);
+        fireMouseEvent('drag', elementDrag, center1X, center1Y);
+        fireMouseEvent('mousemove', elementDrag, center1X, center1Y);
+        fireMouseEvent('drag', elementDrag, center1X, center2Y);
+        fireMouseEvent('mousemove', elementDrop, center1X, center2Y);
 
-    fireMouseEvent('drop', elementDrop, center2X, center2Y);
-    fireMouseEvent('dragend', elementDrag, center2X, center2Y);
-    fireMouseEvent('mouseup', elementDrag, center2X, center2Y);
+        fireMouseEvent('mouseenter', elementDrop, center1X, center2Y);
+        fireMouseEvent('dragenter', elementDrop, center1X, center2Y);
+        fireMouseEvent('mouseover', elementDrop, center1X, center2Y);
+        fireMouseEvent('dragover', elementDrop, center1X, center2Y);
+
+        fireMouseEvent('drop', elementDrop, center1X, center2Y);
+        fireMouseEvent('dragend', elementDrag, center1X, center2Y);
+        fireMouseEvent('mouseup', elementDrag, center1X, center2Y);
+
+    },200);
+    // const pointer1 = document.createElement('div')
+    // pointer1.classList.add('ytr-pointer');
+    // pointer1.classList.add('ytr-active');
+    // pointer1.id = 'pointer1';
+    // const pointer2 = document.createElement('div')
+    // pointer2.classList.add('ytr-pointer');
+    // pointer2.classList.add('ytr-inactive');
+    // pointer2.id = 'pointer2'
+    //
+    // pointer1.style.left = center1X + 'px';
+    // pointer1.style.top = center1Y + 'px';
+    // pointer2.style.left = center1X + 'px';
+    // pointer2.style.top = center2Y + 'px';
+    // body.appendChild(pointer1);
+    // body.appendChild(pointer2)
+
 
 }
 

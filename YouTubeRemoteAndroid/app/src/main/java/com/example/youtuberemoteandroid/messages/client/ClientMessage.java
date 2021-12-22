@@ -3,6 +3,7 @@ package com.example.youtuberemoteandroid.messages.client;
 import com.example.youtuberemoteandroid.enums.Action;
 import com.example.youtuberemoteandroid.enums.MemberType;
 import com.example.youtuberemoteandroid.enums.MessageType;
+import com.example.youtuberemoteandroid.enums.SearchAction;
 import com.google.gson.Gson;
 
 import lombok.AllArgsConstructor;
@@ -41,6 +42,15 @@ public class ClientMessage {
         return toString(new QueueControlMessage(action,targetIndex,currentIndex));
     }
 
+    public static String searchControlMessage(String phrase,SearchAction searchAction){
+        return toString(new SearchControlMessage(phrase,searchAction));
+    }
+
+    public static String searchControlMessage(SearchAction searchAction, int section, int element){
+        return toString(new SearchControlMessage(searchAction,section,element));
+    }
+
+
     @AllArgsConstructor
     @Data
     private static class BasicMessage {
@@ -55,6 +65,7 @@ public class ClientMessage {
 
         public StartMessage(String deviceName) {
             super(MessageType.START);
+            this.deviceName = deviceName;
         }
     }
 
@@ -95,6 +106,28 @@ public class ClientMessage {
             this.currentIndex = currentIndex;
         }
 
+    }
+
+    @Getter
+    public static class SearchControlMessage extends BasicMessage {
+
+        private String phrase;
+        private SearchAction searchAction;
+        private int section;
+        private int element;
+
+        public SearchControlMessage(String phrase, SearchAction searchAction){
+            super(MessageType.SEARCH_CONTROL);
+            this.phrase = phrase;
+            this.searchAction = searchAction;
+        }
+
+        public SearchControlMessage(SearchAction searchAction,int section, int element){
+            super(MessageType.SEARCH_CONTROL);
+            this.searchAction = searchAction;
+            this.section = section;
+            this.element = element;
+        }
     }
 
 }

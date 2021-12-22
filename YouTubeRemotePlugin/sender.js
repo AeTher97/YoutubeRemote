@@ -44,7 +44,6 @@ function emitAllStates() {
 }
 
 function heartBeat() {
-    console.log('Sending heart beat');
     emitState("HEART_BEAT", new Date());
 }
 

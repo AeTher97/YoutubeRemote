@@ -33,6 +33,7 @@ function initializeWebSocket(address, deviceName) {
     socket.addEventListener('message', function (event) {
         const message = JSON.parse(event.data);
         console.log('Message from server ', event.data);
+        console.log(message.messageType);
 
         if (message.messageType === "MEDIA_CONTROL") {
             handleMediaControl(message);
@@ -42,6 +43,9 @@ function initializeWebSocket(address, deviceName) {
         }
         if (message.messageType === "CURRENT_RECEIVER") {
             handleSetReceiver(message);
+        }
+        if(message.messageType === "SEARCH_CONTROL"){
+            handleSearch(message);
         }
     });
 

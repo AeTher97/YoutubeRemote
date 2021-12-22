@@ -9,10 +9,18 @@
     color: white;
     padding: 10px;
     font-size: 15px;
+    font-weight: bold;
 
     cursor: pointer;
     border-radius: 10px;
     overflow: hidden;
+}
+
+.ytr-pointer{
+    width: 5px;
+    height: 5px;
+    position: absolute;
+    z-index: 100000;
 }
 
 .ytr-column {
